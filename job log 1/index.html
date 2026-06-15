@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Field Log" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Field Log</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0F0F0F;
+      --surface: #161616;
+      --surface2: #1A1A1A;
+      --border: #242424;
+      --text: #E8E4DE;
+      --muted: #555;
+      --accent: #4A7FA5;
+      --green: #4A8C6F;
+      --amber: #D4841A;
+      --mono: 'Courier New', Courier, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    html, body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-tap-highlight-color: transparent; }
+    input, textarea, select, button { font-family: inherit; -webkit-appearance: none; appearance: none; }
+    textarea { resize: vertical; }
+
+    /* Layout */
+    .screen { display: none; min-height: 100vh; }
+    .screen.active { display: block; }
+
+    /* Header */
+    .header { border-bottom: 1px solid var(--border); padding: 18px 20px 0; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .header-title { }
+    .header-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 3px; }
+    .header-h1 { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; padding-bottom: 14px; flex-wrap: wrap; }
+
+    /* Tabs */
+    .tabs { border-bottom: 1px solid #1A1A1A; padding: 0 20px; display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 1px; padding: 10px 14px; cursor: pointer; white-space: nowrap; }
+    .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 700; }
+    .tab-count { color: var(--accent); margin-left: 4px; }
+
+    /* Buttons */
+    .btn { border: none; border-radius: 5px; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 9px 16px; cursor: pointer; text-transform: uppercase; display: inline-block; text-align: center; text-decoration: none; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-ghost { background: none; border: 1px solid var(--border); color: var(--muted); }
+    .btn-ghost-green { background: none; border: 1px solid #4A8C6F44; color: var(--green); }
+    .btn-sm { padding: 5px 12px; font-size: 10px; }
+    .btn-danger { background: none; border: 1px solid var(--border); color: #885544; font-family: var(--mono); font-size: 10px; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    .btn-link { display: block; text-align: center; padding: 13px; border-radius: 5px; color: #fff; font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-decoration: none; text-transform: uppercase; }
+    .btn-link-green { background: var(--green); }
+    .btn-link-ghost { background: none; border: 1px solid var(--border); color: var(--muted); margin-top: 8px; }
+
+    /* Form */
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+    .form-input { background: #1C1C1C; border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: var(--mono); font-size: 13px; padding: 8px 10px; width: 100%; }
+    .form-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    textarea.form-input { min-height: 80px; }
+
+    /* Card */
+    .card { background: var(--surface); border-radius: 6px; padding: 18px; margin-bottom: 12px; }
+    .card-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px; margin-bottom: 16px; }
+
+    /* Job card */
+    .job-card { background: var(--surface); border-radius: 0 6px 6px 0; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
+    .job-card:active { background: #1E1E1E; }
+    .job-card-name { font-family: var(--mono); font-weight: 700; font-size: 14px; margin-bottom: 5px; }
+    .job-card-meta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .job-card-meta span { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .job-card-meta .val { color: #999; }
+    .job-card-arrow { color: var(--muted); font-size: 18px; flex-shrink: 0; }
+
+    /* Status badge */
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 3px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .badge-active   { background: #0D1F2D; color: #4A7FA5; border: 1px solid #4A7FA544; }
+    .badge-complete { background: #0E2419; color: #4A8C6F; border: 1px solid #4A8C6F44; }
+    .badge-onhold   { background: #2E2000; color: #D4841A; border: 1px solid #D4841A44; }
+
+    /* Stats strip */
+    .stats { display: flex; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; padding: 12px 16px; border-right: 1px solid var(--border); }
+    .stat-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--accent); }
+    .stat-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    /* Report card */
+    .report-card { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+    .report-header { background: var(--surface2); padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .report-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .report-date { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+    .report-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .report-meta-blue { color: var(--accent); }
+    .report-header-right { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .report-body { padding: 16px; background: var(--surface); display: none; }
+    .report-body.open { display: block; }
+    .report-section { margin-bottom: 14px; }
+    .report-section-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .report-text { font-family: var(--sans); font-size: 13px; color: #CCC; line-height: 1.6; white-space: pre-wrap; }
+
+    /* Trade chips */
+    .trades-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .trade-chip { padding: 4px 10px; border-radius: 3px; font-family: var(--mono); font-size: 11px; cursor: pointer; border: 1px solid var(--border); background: #1A1A1A; color: var(--muted); }
+    .trade-chip.on { border-color: var(--accent); background: #0D1F2D; color: var(--accent); }
+    .trade-chip-display { padding: 3px 10px; border-radius: 3px; font-family: var(--mono); font-size: 11px; background: #0D1F2D; color: var(--accent); border: 1px solid #4A7FA544; }
+
+    /* Photos */
+    .photo-strip { display: flex; flex-wrap: wrap; gap: 8px; }
+    .photo-thumb { position: relative; width: 82px; height: 82px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-remove { position: absolute; top: 2px; right: 2px; background: #000a; border: none; color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .photo-add { width: 82px; height: 82px; border: 2px dashed var(--border); border-radius: 4px; background: #1A1A1A; color: var(--muted); font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal { background: #161616; border: 1px solid var(--border); border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #161616; z-index: 1; }
+    .modal-title { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; }
+    .modal-body { padding: 20px; }
+    .modal-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .modal-tab { flex: 1; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-family: var(--mono); font-size: 11px; padding: 10px; cursor: pointer; letter-spacing: 1px; }
+    .modal-tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 700; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; font-family: var(--mono); font-size: 12px; padding: 10px 20px; border-radius: 6px; z-index: 300; letter-spacing: 1px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+    .toast.show { opacity: 1; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-family: var(--mono); font-size: 13px; }
+
+    /* Misc */
+    .page-content { padding: 18px 20px; }
+    .section-label { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+    .flex-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .hint { font-family: var(--mono); font-size: 10px; color: #3A3A3A; line-height: 1.7; margin-top: 10px; }
+    .error-msg { font-family: var(--mono); font-size: 11px; color: #c66; margin-top: 6px; }
+    pre.preview { background: #111; border: 1px solid var(--border); border-radius: 4px; color: #777; font-family: var(--mono); font-size: 10px; padding: 12px; white-space: pre-wrap; max-height: 220px; overflow-y: auto; margin-bottom: 12px; }
+    .install-banner { background: #0D1F2D; border: 1px solid #4A7FA533; border-radius: 6px; padding: 14px 16px; margin: 0 20px 16px; font-family: var(--mono); font-size: 11px; color: #aaa; line-height: 1.7; display: none; }
+    .install-banner strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Install banner (shown on first visit in Safari) -->
+<div class="install-banner" id="installBanner">
+  <strong>Install this app:</strong> Tap the Share button (box with arrow) at the bottom of Safari, then tap <strong>"Add to Home Screen"</strong>.
+</div>
+
+<!-- SCREEN: Jobs List -->
+<div class="screen active" id="screen-jobs">
+  <div class="header">
+    <div class="header-title">
+      <div class="header-eyebrow">Field Log</div>
+      <div class="header-h1">Job Log</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost-green btn-sm" onclick="showBackupModal()">Backup</button>
+      <button class="btn btn-primary" onclick="showAddJob()">+ New Job</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-filter="all" onclick="setFilter(this)">All <span class="tab-count" id="count-all">0</span></button>
+    <button class="tab" data-filter="active" onclick="setFilter(this)">Active <span class="tab-count" id="count-active">0</span></button>
+    <button class="tab" data-filter="onhold" onclick="setFilter(this)">On Hold <span class="tab-count" id="count-onhold">0</span></button>
+    <button class="tab" data-filter="complete" onclick="setFilter(this)">Complete <span class="tab-count" id="count-complete">0</span></button>
+  </div>
+
+  <div id="installBanner" class="install-banner"></div>
+
+  <div class="page-content">
+    <!-- Add job form (hidden by default) -->
+    <div class="card-panel" id="addJobForm" style="display:none">
+      <div class="section-label">New Job</div>
+      <div class="form-group">
+        <label class="form-label">Job Name *</label>
+        <input class="form-input" id="newJobName" placeholder="e.g. 124 Oak St - Renovation" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Client</label>
+          <input class="form-input" id="newJobClient" placeholder="Client name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="newJobStatus">
+            <option value="active">Active</option>
+            <option value="onhold">On Hold</option>
+            <option value="complete">Complete</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location / Address</label>
+        <input class="form-input" id="newJobLocation" placeholder="Site address" />
+      </div>
+      <div class="flex-row">
+        <button class="btn btn-primary" onclick="createJob()">Create Job</button>
+        <button class="btn btn-ghost" onclick="hideAddJob()">Cancel</button>
+      </div>
+    </div>
+
+    <div id="jobsList"></div>
+  </div>
+</div>
+
+<!-- SCREEN: Job Detail -->
+<div class="screen" id="screen-detail">
+  <div class="header" style="padding-bottom:14px">
+    <div class="flex-row">
+      <button class="btn btn-ghost btn-sm" onclick="goBack()">&#8592; Jobs</button>
+      <div id="detailJobName" style="font-family:var(--mono);font-weight:700;font-size:15px"></div>
+      <span id="detailJobBadge"></span>
+    </div>
+    <div class="flex-row" style="padding-top:4px">
+      <span id="detailJobMeta" style="font-family:var(--mono);font-size:11px;color:var(--muted)"></span>
+      <button class="btn btn-ghost btn-sm" onclick="showEditJob()">Edit Job</button>
+      <button class="btn btn-primary" onclick="addTodayReport()">+ Today's Report</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="statReports">0</div><div class="stat-label">Reports</div></div>
+    <div class="stat"><div class="stat-val" id="statPhotos">0</div><div class="stat-label">Photos</div></div>
+    <div class="stat"><div class="stat-val" id="statTrades">0</div><div class="stat-label">Trades</div></div>
+  </div>
+
+  <div class="page-content">
+    <div id="reportsList"></div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Job -->
+<div class="modal-overlay" id="editJobModal" style="display:none" onclick="closeEditJob(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Edit Job</span>
+      <button class="modal-close" onclick="closeEditJobModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Job Name</label><input class="form-input" id="editJobName" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Client</label><input class="form-input" id="editJobClient" /></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-input" id="editJobStatus">
+            <option value="active">Active</option>
+            <option value="onhold">On Hold</option>
+            <option value="complete">Complete</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="editJobLocation" /></div>
+      <div class="flex-row">
+        <button class="btn btn-green" onclick="saveJobEdit()">Save</button>
+        <button class="btn btn-ghost" onclick="closeEditJobModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Report -->
+<div class="modal-overlay" id="reportModal" style="display:none" onclick="closeReportModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="reportModalTitle">Daily Report</span>
+      <button class="modal-close" onclick="closeReportModalBtn()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Weather</label>
+          <select class="form-input" id="rWeather">
+            <option value="">-- Select --</option>
+            <option>Sunny</option><option>Cloudy</option><option>Partly Cloudy</option>
+            <option>Rainy</option><option>Windy</option><option>Snow</option><option>Fog</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Temp (F)</label>
+          <input class="form-input" type="number" id="rTemp" placeholder="e.g. 72" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Trades on Site</label>
+        <div class="trades-grid" id="rTrades"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Work Performed</label>
+        <textarea class="form-input" id="rWorkDone" rows="4" placeholder="Describe what happened on site today..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Issues / Delays</label>
+        <textarea class="form-input" id="rIssues" rows="3" placeholder="Any problems, RFIs, delays..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Materials Delivered</label>
+        <textarea class="form-input" id="rMaterials" rows="2" placeholder="Lumber, concrete, fixtures..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Next Day Plan</label>
+        <textarea class="form-input" id="rNextDay" rows="2" placeholder="What is scheduled tomorrow..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Photos</label>
+        <div class="photo-strip" id="rPhotos"></div>
+        <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotoAdd(this)" />
+      </div>
+
+      <div class="flex-row">
+        <button class="btn btn-green" onclick="saveReport()">Save Report</button>
+        <button class="btn btn-ghost" onclick="closeReportModalBtn()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Email Report -->
+<div class="modal-overlay" id="emailModal" style="display:none" onclick="closeEmailModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Email Report</span>
+      <button class="modal-close" onclick="document.getElementById('emailModal').style.display='none'">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <div class="form-input" id="emailSubject" style="color:#aaa;user-select:all"></div>
+      </div>
+      <label class="form-label">Preview</label>
+      <pre class="preview" id="emailBody"></pre>
+      <a class="btn-link btn-link-green" id="emailLink" href="#" target="_blank">Open in Mail App</a>
+      <button class="btn-link btn-link-ghost btn" onclick="document.getElementById('emailModal').style.display='none'" style="margin-top:8px">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Backup -->
+<div class="modal-overlay" id="backupModal" style="display:none" onclick="closeBackupModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Backup &amp; Restore</span>
+      <button class="modal-close" onclick="document.getElementById('backupModal').style.display='none'">&#x2715;</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabSave" onclick="switchBackupTab('save')">Save Backup</button>
+      <button class="modal-tab" id="tabLoad" onclick="switchBackupTab('load')">Load Backup</button>
+    </div>
+    <div class="modal-body">
+      <div id="backupSavePanel">
+        <p style="font-size:13px;color:#aaa;line-height:1.7;margin-bottom:16px">
+          Tap the button below. Your Mail app opens with the backup already written.
+          <strong style="color:var(--text)"> Just send it to yourself</strong> — it will live in your inbox.
+          To restore later, open that email, copy all the text, and paste it into Load Backup.
+        </p>
+        <a class="btn-link btn-link-green" id="backupEmailLink" href="#">Email Backup to Myself</a>
+        <a class="btn-link btn-link-ghost" id="backupEmailNoPhotosLink" href="#" style="display:none;margin-top:8px">Email Without Photos (smaller)</a>
+        <div class="hint">If you have lots of photos the email may be large. Use "without photos" if it fails to send.</div>
+      </div>
+      <div id="backupLoadPanel" style="display:none">
+        <p style="font-size:13px;color:#aaa;line-height:1.7;margin-bottom:12px">
+          Open your backup email, copy all the text, paste it below, then tap Restore.
+        </p>
+        <textarea class="form-input" id="backupPasteArea" rows="7" placeholder="Paste your backup email text here..."></textarea>
+        <div class="error-msg" id="backupError" style="display:none"></div>
+        <div class="flex-row" style="margin-top:12px">
+          <button class="btn btn-primary" onclick="doRestore()">Restore</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('backupModal').style.display='none'">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'fieldlog-v1';
+let jobs = [];
+let currentJobId = null;
+let currentFilter = 'all';
+let editingReportId = null;
+let reportPhotos = [];
+let selectedTrades = [];
+
+const TRADES = [
+  "General Contractor","Electrician","Plumber","HVAC","Carpenter","Framer",
+  "Roofer","Mason","Drywaller","Painter","Flooring","Concrete","Steel/Iron",
+  "Landscaping","Excavation","Insulation","Tile","Glazier","Fire Protection",
+  "Low Voltage","Other"
+];
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ version:1, jobs }));
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { const d = JSON.parse(raw); jobs = d.jobs || []; }
+  } catch(e) { jobs = []; }
+}
+function uid() { return Math.random().toString(36).slice(2,10); }
+function today() { return new Date().toISOString().slice(0,10); }
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[+m-1]} ${+d}, ${y}`;
+}
+function fmtDateLong(iso) {
+  if (!iso) return '';
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const [y,m,d] = iso.split('-');
+  const dt = new Date(`${iso}T12:00:00`);
+  return `${days[dt.getDay()]}, ${months[+m-1]} ${+d}, ${y}`;
+}
+
+// ─── Toast ───────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── Screens ─────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ─── Badge ───────────────────────────────────────────────────────────────────
+function badgeHTML(status) {
+  const map = { active:'badge-active', complete:'badge-complete', onhold:'badge-onhold' };
+  const labels = { active:'Active', complete:'Complete', onhold:'On Hold' };
+  return `<span class="badge ${map[status]||'badge-active'}">${labels[status]||status}</span>`;
+}
+function borderColor(status) {
+  return { active:'#4A7FA5', complete:'#4A8C6F', onhold:'#D4841A' }[status] || '#4A7FA5';
+}
+
+// ─── Jobs List ───────────────────────────────────────────────────────────────
+function renderJobs() {
+  const counts = { all:jobs.length, active:0, onhold:0, complete:0 };
+  jobs.forEach(j => { if (counts[j.status] !== undefined) counts[j.status]++; });
+  ['all','active','onhold','complete'].forEach(f => {
+    const el = document.getElementById(`count-${f}`);
+    if (el) el.textContent = counts[f];
+  });
+
+  const filtered = currentFilter === 'all' ? jobs : jobs.filter(j => j.status === currentFilter);
+  const list = document.getElementById('jobsList');
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty">${currentFilter==='all'?'No jobs yet. Tap + New Job to start.':'No '+currentFilter+' jobs.'}</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(job => {
+    const rc = job.reports ? job.reports.length : 0;
+    const pc = job.reports ? job.reports.reduce((n,r)=>n+r.photos.length,0) : 0;
+    const last = job.reports && job.reports[0] ? `Last: ${fmtDate(job.reports[0].date)}` : '';
+    return `
+      <div class="job-card" style="border-left:3px solid ${borderColor(job.status)}" onclick="openJob('${job.id}')">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+            <span class="job-card-name">${esc(job.name)}</span>
+            ${badgeHTML(job.status)}
+          </div>
+          <div class="job-card-meta">
+            ${job.client ? `<span>Client: <span class="val">${esc(job.client)}</span></span>` : ''}
+            ${job.location ? `<span class="val">${esc(job.location)}</span>` : ''}
+            <span>${rc} report${rc!==1?'s':''}${pc>0?` &middot; ${pc} photo${pc!==1?'s':''}`:''}</span>
+            ${last ? `<span style="color:#444">${last}</span>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          <button class="btn-danger" onclick="event.stopPropagation();deleteJob('${job.id}')">Del</button>
+          <span class="job-card-arrow">›</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function setFilter(btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = btn.dataset.filter;
+  renderJobs();
+}
+
+function showAddJob() {
+  document.getElementById('addJobForm').style.display = 'block';
+  document.getElementById('newJobName').value = '';
+  document.getElementById('newJobClient').value = '';
+  document.getElementById('newJobLocation').value = '';
+  document.getElementById('newJobStatus').value = 'active';
+  document.getElementById('newJobName').focus();
+}
+function hideAddJob() { document.getElementById('addJobForm').style.display = 'none'; }
+
+function createJob() {
+  const name = document.getElementById('newJobName').value.trim();
+  if (!name) { showToast('Job name is required'); return; }
+  const job = {
+    id: uid(), name,
+    client: document.getElementById('newJobClient').value.trim(),
+    location: document.getElementById('newJobLocation').value.trim(),
+    status: document.getElementById('newJobStatus').value,
+    reports: [], created: today()
+  };
+  jobs.unshift(job);
+  save();
+  hideAddJob();
+  renderJobs();
+  openJob(job.id);
+}
+
+function deleteJob(id) {
+  if (!confirm('Delete this job and all its reports?')) return;
+  jobs = jobs.filter(j => j.id !== id);
+  save();
+  renderJobs();
+}
+
+// ─── Job Detail ──────────────────────────────────────────────────────────────
+function openJob(id) {
+  currentJobId = id;
+  renderDetail();
+  showScreen('screen-detail');
+}
+function goBack() { showScreen('screen-jobs'); renderJobs(); }
+
+function currentJob() { return jobs.find(j => j.id === currentJobId); }
+
+function renderDetail() {
+  const job = currentJob();
+  if (!job) return;
+  document.getElementById('detailJobName').textContent = job.name;
+  document.getElementById('detailJobBadge').innerHTML = badgeHTML(job.status);
+  const metaParts = [job.client?`Client: ${job.client}`:'', job.location||''].filter(Boolean);
+  document.getElementById('detailJobMeta').textContent = metaParts.join('  ·  ');
+
+  const reports = job.reports || [];
+  document.getElementById('statReports').textContent = reports.length;
+  document.getElementById('statPhotos').textContent = reports.reduce((n,r)=>n+r.photos.length,0);
+  const allTrades = [...new Set(reports.flatMap(r=>r.trades))];
+  document.getElementById('statTrades').textContent = allTrades.length;
+
+  const list = document.getElementById('reportsList');
+  if (reports.length === 0) {
+    list.innerHTML = `<div class="empty">No reports yet. Tap + Today's Report to start logging.</div>`;
+    return;
+  }
+  list.innerHTML = reports.map(r => buildReportCard(r, job)).join('');
+}
+
+function buildReportCard(r, job) {
+  const metaParts = [];
+  if (r.weather) metaParts.push(r.weather + (r.temp ? ` · ${r.temp}F` : ''));
+  if (r.trades && r.trades.length) metaParts.push(`<span class="report-meta-blue">${r.trades.length} trade${r.trades.length!==1?'s':''}</span>`);
+  if (r.photos && r.photos.length) metaParts.push(`📷 ${r.photos.length}`);
+
+  const tradesHTML = (r.trades||[]).map(t=>`<span class="trade-chip-display">${esc(t)}</span>`).join('');
+  const photosHTML = (r.photos||[]).map(p=>`<div class="photo-thumb"><img src="${p.src}" alt="" /></div>`).join('');
+
+  return `
+    <div class="report-card" id="rcard-${r.id}">
+      <div class="report-header" onclick="toggleReport('${r.id}')">
+        <div class="report-header-left">
+          <span class="report-date">${fmtDate(r.date)}</span>
+          ${metaParts.map(m=>`<span class="report-meta">${m}</span>`).join('')}
+        </div>
+        <div class="report-header-right">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEmailReport('${r.id}')">Email</button>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditReport('${r.id}')">Edit</button>
+          <button class="btn-danger" onclick="event.stopPropagation();deleteReport('${r.id}')">Del</button>
+          <span style="color:var(--muted);font-size:14px" id="rarrow-${r.id}">›</span>
+        </div>
+      </div>
+      <div class="report-body" id="rbody-${r.id}">
+        ${r.trades&&r.trades.length?`<div class="report-section"><div class="report-section-label">Trades on Site</div><div class="trades-grid">${tradesHTML}</div></div>`:''}
+        ${r.workDone?`<div class="report-section"><div class="report-section-label">Work Performed</div><div class="report-text">${esc(r.workDone)}</div></div>`:''}
+        ${r.issues?`<div class="report-section"><div class="report-section-label">Issues / Delays</div><div class="report-text">${esc(r.issues)}</div></div>`:''}
+        ${r.materials?`<div class="report-section"><div class="report-section-label">Materials Delivered</div><div class="report-text">${esc(r.materials)}</div></div>`:''}
+        ${r.nextDay?`<div class="report-section"><div class="report-section-label">Next Day Plan</div><div class="report-text">${esc(r.nextDay)}</div></div>`:''}
+        ${r.photos&&r.photos.length?`<div class="report-section"><div class="report-section-label">Photos (${r.photos.length})</div><div class="photo-strip">${photosHTML}</div></div>`:''}
+      </div>
+    </div>`;
+}
+
+function toggleReport(id) {
+  const body = document.getElementById(`rbody-${id}`);
+  const arrow = document.getElementById(`rarrow-${id}`);
+  const open = body.classList.toggle('open');
+  if (arrow) arrow.textContent = open ? 'v' : '›';
+}
+
+function deleteReport(id) {
+  if (!confirm('Delete this report?')) return;
+  const job = currentJob();
+  job.reports = job.reports.filter(r => r.id !== id);
+  save();
+  renderDetail();
+}
+
+// ─── Edit Job Modal ───────────────────────────────────────────────────────────
+function showEditJob() {
+  const job = currentJob();
+  document.getElementById('editJobName').value = job.name;
+  document.getElementById('editJobClient').value = job.client || '';
+  document.getElementById('editJobLocation').value = job.location || '';
+  document.getElementById('editJobStatus').value = job.status;
+  document.getElementById('editJobModal').style.display = 'flex';
+}
+function closeEditJobModal() { document.getElementById('editJobModal').style.display = 'none'; }
+function closeEditJob(e) { if (e.target === document.getElementById('editJobModal')) closeEditJobModal(); }
+function saveJobEdit() {
+  const job = currentJob();
+  job.name = document.getElementById('editJobName').value.trim() || job.name;
+  job.client = document.getElementById('editJobClient').value.trim();
+  job.location = document.getElementById('editJobLocation').value.trim();
+  job.status = document.getElementById('editJobStatus').value;
+  save();
+  renderDetail();
+  closeEditJobModal();
+  showToast('Job updated');
+}
+
+// ─── Report Modal ─────────────────────────────────────────────────────────────
+function buildTradesUI() {
+  const container = document.getElementById('rTrades');
+  container.innerHTML = TRADES.map(t => {
+    const on = selectedTrades.includes(t);
+    return `<button class="trade-chip ${on?'on':''}" onclick="toggleTrade(this,'${t}')">${t}</button>`;
+  }).join('');
+}
+function toggleTrade(btn, trade) {
+  if (selectedTrades.includes(trade)) {
+    selectedTrades = selectedTrades.filter(t=>t!==trade);
+    btn.classList.remove('on');
+  } else {
+    selectedTrades.push(trade);
+    btn.classList.add('on');
+  }
+}
+
+function buildPhotosUI() {
+  const strip = document.getElementById('rPhotos');
+  const thumbs = reportPhotos.map(p=>`
+    <div class="photo-thumb">
+      <img src="${p.src}" alt="" />
+      <button class="photo-remove" onclick="removePhoto('${p.id}')">x</button>
+    </div>`).join('');
+  strip.innerHTML = thumbs + `<button class="photo-add" onclick="document.getElementById('photoInput').click()">+</button>`;
+}
+function removePhoto(id) {
+  reportPhotos = reportPhotos.filter(p=>p.id!==id);
+  buildPhotosUI();
+}
+function handlePhotoAdd(input) {
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      reportPhotos.push({ id:uid(), src:ev.target.result, caption:file.name });
+      buildPhotosUI();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function openAddReport(date) {
+  editingReportId = null;
+  selectedTrades = [];
+  reportPhotos = [];
+  document.getElementById('reportModalTitle').textContent = 'New Report — ' + fmtDate(date);
+  document.getElementById('rWeather').value = '';
+  document.getElementById('rTemp').value = '';
+  document.getElementById('rWorkDone').value = '';
+  document.getElementById('rIssues').value = '';
+  document.getElementById('rMaterials').value = '';
+  document.getElementById('rNextDay').value = '';
+  buildTradesUI();
+  buildPhotosUI();
+  document.getElementById('reportModal').style.display = 'flex';
+  // store date on modal for saving
+  document.getElementById('reportModal').dataset.date = date;
+}
+function openEditReport(id) {
+  const job = currentJob();
+  const r = job.reports.find(r=>r.id===id);
+  if (!r) return;
+  editingReportId = id;
+  selectedTrades = [...(r.trades||[])];
+  reportPhotos = [...(r.photos||[])];
+  document.getElementById('reportModalTitle').textContent = 'Edit — ' + fmtDate(r.date);
+  document.getElementById('rWeather').value = r.weather||'';
+  document.getElementById('rTemp').value = r.temp||'';
+  document.getElementById('rWorkDone').value = r.workDone||'';
+  document.getElementById('rIssues').value = r.issues||'';
+  document.getElementById('rMaterials').value = r.materials||'';
+  document.getElementById('rNextDay').value = r.nextDay||'';
+  buildTradesUI();
+  buildPhotosUI();
+  document.getElementById('reportModal').style.display = 'flex';
+  document.getElementById('reportModal').dataset.date = r.date;
+}
+function closeReportModal(e) { if (e.target===document.getElementById('reportModal')) closeReportModalBtn(); }
+function closeReportModalBtn() { document.getElementById('reportModal').style.display = 'none'; }
+
+function saveReport() {
+  const job = currentJob();
+  const date = document.getElementById('reportModal').dataset.date;
+  const report = {
+    id: editingReportId || uid(),
+    date,
+    weather: document.getElementById('rWeather').value,
+    temp: document.getElementById('rTemp').value,
+    trades: [...selectedTrades],
+    workDone: document.getElementById('rWorkDone').value.trim(),
+    issues: document.getElementById('rIssues').value.trim(),
+    materials: document.getElementById('rMaterials').value.trim(),
+    nextDay: document.getElementById('rNextDay').value.trim(),
+    photos: [...reportPhotos],
+  };
+  if (editingReportId) {
+    job.reports = job.reports.map(r => r.id===editingReportId ? report : r);
+  } else {
+    job.reports = job.reports || [];
+    job.reports.unshift(report);
+  }
+  save();
+  closeReportModalBtn();
+  renderDetail();
+  showToast('Report saved');
+}
+
+function addTodayReport() {
+  const job = currentJob();
+  const td = today();
+  if (job.reports && job.reports.find(r=>r.date===td)) {
+    if (!confirm('A report for today already exists. Add another anyway?')) return;
+  }
+  openAddReport(td);
+}
+
+// ─── Email Report ─────────────────────────────────────────────────────────────
+function openEmailReport(reportId) {
+  const job = currentJob();
+  const r = job.reports.find(r=>r.id===reportId);
+  if (!r) return;
+  const subject = `Site Report - ${job.name} - ${fmtDate(r.date)}`;
+  const tradesStr = r.trades&&r.trades.length ? r.trades.join(', ') : 'None recorded';
+  const body = [
+    'DAILY SITE REPORT',
+    '===================================',
+    `Job:       ${job.name}`,
+    `Location:  ${job.location||'-'}`,
+    `Client:    ${job.client||'-'}`,
+    `Date:      ${fmtDateLong(r.date)}`,
+    `Weather:   ${r.weather||'-'}`,
+    `Temp:      ${r.temp?r.temp+'F':'-'}`,
+    '',
+    'TRADES ON SITE',
+    '-----------------------------------',
+    tradesStr,
+    '',
+    'WORK PERFORMED',
+    '-----------------------------------',
+    r.workDone||'(none recorded)',
+    '',
+    'ISSUES / DELAYS',
+    '-----------------------------------',
+    r.issues||'(none)',
+    '',
+    'MATERIALS DELIVERED',
+    '-----------------------------------',
+    r.materials||'(none)',
+    '',
+    'NEXT DAY PLAN',
+    '-----------------------------------',
+    r.nextDay||'(none recorded)',
+    '',
+    r.photos&&r.photos.length ? `Photos: ${r.photos.length} on file` : '',
+    '',
+    '-----------------------------------',
+    'Generated by Field Log',
+  ].filter(l=>l!==undefined).join('\n');
+
+  document.getElementById('emailSubject').textContent = subject;
+  document.getElementById('emailBody').textContent = body;
+  document.getElementById('emailLink').href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  document.getElementById('emailModal').style.display = 'flex';
+}
+function closeEmailModal(e) { if (e.target===document.getElementById('emailModal')) document.getElementById('emailModal').style.display='none'; }
+
+// ─── Backup ───────────────────────────────────────────────────────────────────
+function makeBackup(data) {
+  return JSON.stringify({ version:1, exported:new Date().toISOString(), jobs:data });
+}
+function makeMailtoBody(backupStr) {
+  return encodeURIComponent(
+    'FIELD LOG BACKUP - Keep this email!\n\nTo restore: open Field Log, tap Backup, choose Load Backup, paste all text below.\n\n---BEGIN BACKUP---\n' + backupStr + '\n---END BACKUP---'
+  );
+}
+
+function showBackupModal() {
+  const dateStr = new Date().toLocaleDateString();
+  const subj = encodeURIComponent(`Field Log Backup - ${dateStr}`);
+  const full = makeBackup(jobs);
+  const noPhotos = makeBackup(jobs.map(j=>({...j,reports:j.reports.map(r=>({...r,photos:[]}))})));
+  const totalPhotos = jobs.reduce((n,j)=>n+j.reports.reduce((m,r)=>m+r.photos.length,0),0);
+
+  document.getElementById('backupEmailLink').href = `mailto:?subject=${subj}&body=${makeMailtoBody(full)}`;
+  const npl = document.getElementById('backupEmailNoPhotosLink');
+  if (totalPhotos > 0) {
+    npl.href = `mailto:?subject=${subj}&body=${makeMailtoBody(noPhotos)}`;
+    npl.textContent = `Email Without Photos (${totalPhotos} photo${totalPhotos!==1?'s':''} excluded — smaller)`;
+    npl.style.display = 'block';
+  } else {
+    npl.style.display = 'none';
+  }
+  document.getElementById('backupPasteArea').value = '';
+  document.getElementById('backupError').style.display = 'none';
+  switchBackupTab('save');
+  document.getElementById('backupModal').style.display = 'flex';
+}
+function closeBackupModal(e) { if (e.target===document.getElementById('backupModal')) document.getElementById('backupModal').style.display='none'; }
+function switchBackupTab(tab) {
+  document.getElementById('tabSave').classList.toggle('active', tab==='save');
+  document.getElementById('tabLoad').classList.toggle('active', tab==='load');
+  document.getElementById('backupSavePanel').style.display = tab==='save'?'block':'none';
+  document.getElementById('backupLoadPanel').style.display = tab==='load'?'block':'none';
+}
+function doRestore() {
+  const errEl = document.getElementById('backupError');
+  errEl.style.display = 'none';
+  let raw = document.getElementById('backupPasteArea').value.trim();
+  // Strip wrapper text if present
+  if (raw.includes('---BEGIN BACKUP---')) raw = raw.split('---BEGIN BACKUP---')[1];
+  if (raw.includes('---END BACKUP---')) raw = raw.split('---END BACKUP---')[0];
+  raw = raw.trim();
+  try {
+    const parsed = JSON.parse(raw);
+    const loaded = parsed.jobs || parsed;
+    if (!Array.isArray(loaded)) throw new Error('bad');
+    if (!confirm(`Restore ${loaded.length} job(s)? This replaces all current data.`)) return;
+    jobs = loaded;
+    save();
+    document.getElementById('backupModal').style.display = 'none';
+    renderJobs();
+    showToast(`Restored ${jobs.length} job(s)`);
+  } catch(e) {
+    errEl.textContent = 'Could not read backup. Make sure you pasted the full text from your backup email.';
+    errEl.style.display = 'block';
+  }
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Install banner (iPhone Safari) ──────────────────────────────────────────
+function checkInstallBanner() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const dismissed = localStorage.getItem('installDismissed');
+  if (isIOS && !isStandalone && !dismissed) {
+    const banner = document.getElementById('installBanner');
+    banner.innerHTML = `
+      <strong>Install as App:</strong> Tap the Share button &#x2197; at the bottom of Safari, then tap <strong>"Add to Home Screen"</strong>.
+      <button onclick="this.parentElement.style.display='none';localStorage.setItem('installDismissed','1')" style="float:right;background:none;border:none;color:#4A7FA5;font-size:13px;cursor:pointer;font-family:var(--mono)">Dismiss</button>
+    `;
+    banner.style.display = 'block';
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+load();
+renderJobs();
+checkInstallBanner();
+</script>
+</body>
+</html>
