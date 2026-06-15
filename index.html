@@ -390,6 +390,7 @@ let jobs = [];
 let currentJobId = null;
 let currentFilter = 'all';
 let editingReportId = null;
+let currentReportDate = null;
 let reportPhotos = [];
 let selectedTrades = [];
 
@@ -698,7 +699,7 @@ function openAddReport(date) {
   buildPhotosUI();
   document.getElementById('reportModal').style.display = 'flex';
   // store date on modal for saving
-  document.getElementById('reportModal').dataset.date = date;
+  currentReportDate = date;
 }
 function openEditReport(id) {
   const job = currentJob();
@@ -717,14 +718,14 @@ function openEditReport(id) {
   buildTradesUI();
   buildPhotosUI();
   document.getElementById('reportModal').style.display = 'flex';
-  document.getElementById('reportModal').dataset.date = r.date;
+  currentReportDate = r.date;
 }
 function closeReportModal(e) { if (e.target===document.getElementById('reportModal')) closeReportModalBtn(); }
 function closeReportModalBtn() { document.getElementById('reportModal').style.display = 'none'; }
 
 function saveReport() {
   const job = currentJob();
-  const date = document.getElementById('reportModal').dataset.date;
+  const date = currentReportDate;
   const report = {
     id: editingReportId || uid(),
     date,
