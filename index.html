@@ -10,1050 +10,973 @@
   <link rel="manifest" href="manifest.json" />
   <title>Site Boss</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #0E1014; --surface: #1A1D24; --surface2: #22262F; --surface3: #2A2F3A;
-      --border: #2E3340; --border2: #3A4050; --text: #F0F2F5; --text2: #A0A8B8; --muted: #505870;
-      --orange: #FF6B2B; --orange2: #FF8C5A; --orange-dim: #FF6B2B18; --orange-b: #FF6B2B40;
-      --green: #2ECC8A; --green-dim: #2ECC8A18; --green-b: #2ECC8A40;
-      --red: #FF4757; --red-dim: #FF475718; --red-b: #FF475740;
-      --amber: #F59E0B; --amber-dim: #F59E0B18; --amber-b: #F59E0B40;
-      --blue: #4A9EFF; --blue-dim: #4A9EFF15;
-      --mono: 'JetBrains Mono', 'Courier New', monospace;
-      --sans: 'Inter', -apple-system, sans-serif;
-      --nav-h: 68px; --r: 12px;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0E1014;--sf:#1A1D24;--sf2:#22262F;--bd:#2E3340;--bd2:#3A4050;
+      --tx:#F0F2F5;--tx2:#A0A8B8;--mu:#505870;
+      --or:#FF6B2B;--or2:#FF8C5A;--od:#FF6B2B18;--ob:#FF6B2B40;
+      --gr:#2ECC8A;--gd:#2ECC8A18;--gb:#2ECC8A40;
+      --rd:#FF4757;--rdd:#FF475718;--rb:#FF475740;
+      --am:#F59E0B;--amd:#F59E0B18;--amb:#F59E0B40;
+      --bl:#4A9EFF;--bld:#4A9EFF15;
+      --mono:'Courier New',monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --nh:68px;--r:12px
     }
-    html, body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
-    input, textarea, select, button { font-family: inherit; -webkit-appearance: none; appearance: none; }
-    textarea { resize: vertical; }
-
-    .hazard-stripe { height: 4px; background: repeating-linear-gradient(-45deg, var(--orange) 0px, var(--orange) 8px, #000 8px, #000 16px); opacity: 0.7; }
-
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: var(--surface); border-top: 1px solid var(--border); display: flex; z-index: 50; padding-bottom: env(safe-area-inset-bottom); }
-    .nav-btn { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; padding: 8px 0; position: relative; }
-    .nav-icon { font-size: 22px; line-height: 1; transition: transform 0.2s; }
-    .nav-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); transition: color 0.2s; }
-    .nav-btn.active .nav-label { color: var(--orange); }
-    .nav-btn.active .nav-icon { transform: scale(1.15); }
-    .nav-pip { position: absolute; top: 8px; width: 4px; height: 4px; background: var(--orange); border-radius: 50%; display: none; }
-    .nav-btn.active .nav-pip { display: block; }
-
-    .screen { display: none; min-height: 100vh; padding-bottom: calc(var(--nav-h) + 20px); }
-    .screen.active { display: block; animation: fadeUp 0.2s ease; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-
-    .top-bar { background: linear-gradient(135deg, #1A1D24 0%, #111318 100%); padding: 18px 20px 16px; padding-top: calc(18px + env(safe-area-inset-top)); border-bottom: 1px solid var(--border); display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-    .top-bar-eyebrow { font-family: var(--mono); font-size: 9px; color: var(--orange); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
-    .top-bar-eyebrow::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--orange); border-radius: 50%; }
-    .top-bar-title { font-size: 24px; font-weight: 800; letter-spacing: -0.8px; color: var(--text); }
-
-    .section { padding: 16px 18px 0; }
-    .section-head { font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-    .section-head::before { content: '//'; color: var(--orange); margin-right: 6px; font-weight: 700; }
-
-    .btn { border: none; border-radius: 8px; font-family: var(--sans); font-size: 13px; font-weight: 700; padding: 10px 18px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
-    .btn:active { transform: scale(0.97); }
-    .btn-orange { background: var(--orange); color: #fff; }
-    .btn-ghost { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); }
-    .btn-ghost-orange { background: var(--orange-dim); border: 1px solid var(--orange-b); color: var(--orange); }
-    .btn-green { background: var(--green-dim); border: 1px solid var(--green-b); color: var(--green); }
-    .btn-red { background: var(--red-dim); border: 1px solid var(--red-b); color: var(--red); }
-    .btn-sm { padding: 6px 12px; font-size: 11px; border-radius: 6px; }
-    .btn-xs { padding: 4px 10px; font-size: 10px; border-radius: 5px; font-family: var(--mono); }
-    .btn-link { display: block; text-align: center; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.15s; }
-    .btn-link-orange { background: var(--orange); color: #fff; }
-    .btn-link-ghost { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); margin-top: 10px; }
-
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; font-family: var(--mono); font-size: 10px; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
-    .form-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--sans); font-size: 14px; padding: 10px 13px; width: 100%; transition: border-color 0.15s; }
-    .form-input:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-dim); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    textarea.form-input { min-height: 85px; line-height: 1.5; }
-
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 10px; }
-    .card-panel { background: var(--surface); border: 1px solid var(--orange-b); border-radius: var(--r); padding: 18px; margin-bottom: 16px; }
-
-    .job-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 15px 16px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.15s; position: relative; overflow: hidden; }
-    .job-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
-    .job-card.s-active::before { background: var(--orange); }
-    .job-card.s-complete::before { background: var(--green); }
-    .job-card.s-onhold::before { background: var(--amber); }
-    .job-card:active { background: var(--surface2); }
-    .job-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.3px; }
-    .job-meta { display: flex; gap: 8px; flex-wrap: wrap; }
-    .job-meta span { font-family: var(--mono); font-size: 10px; color: var(--text2); }
-
-    .progress-ring-wrap { position: relative; flex-shrink: 0; }
-    .progress-ring-wrap svg { display: block; transform: rotate(-90deg); }
-    .progress-ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; font-weight: 700; }
-
-    .punch-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 13px 14px; margin-bottom: 8px; display: flex; gap: 12px; align-items: flex-start; position: relative; overflow: hidden; }
-    .punch-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
-    .punch-item.ph::before { background: var(--red); box-shadow: 2px 0 8px var(--red); }
-    .punch-item.pm::before { background: var(--amber); }
-    .punch-item.pl::before { background: var(--green); }
-    .punch-item.done { opacity: 0.4; }
-    .punch-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border2); background: none; cursor: pointer; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.2s; }
-    .punch-check.checked { background: var(--green); border-color: var(--green); color: #000; font-weight: 700; box-shadow: 0 0 12px var(--green-b); }
-    .punch-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .punch-title.done { text-decoration: line-through; color: var(--muted); }
-    .punch-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-    .ppill { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
-    .ppill.h { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-b); }
-    .ppill.m { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-b); }
-    .ppill.l { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-b); }
-
-    .stats-scroll { display: flex; gap: 10px; padding: 14px 18px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .stats-scroll::-webkit-scrollbar { display: none; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; flex-shrink: 0; min-width: 88px; text-align: center; }
-    .stat-val { font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--orange); line-height: 1; }
-    .stat-label { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-
-    .report-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 10px; }
-    .report-head { padding: 14px 15px; display: flex; align-items: flex-start; justify-content: space-between; cursor: pointer; gap: 10px; }
-    .report-head:active { background: var(--surface2); }
-    .report-date { font-family: var(--mono); font-size: 13px; font-weight: 700; }
-    .report-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
-    .chip { font-family: var(--mono); font-size: 9px; padding: 3px 8px; border-radius: 20px; background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-b); font-weight: 600; }
-    .report-body { padding: 14px 15px; border-top: 1px solid var(--border); display: none; }
-    .report-body.open { display: block; }
-    .rslabel { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-    .rstext { font-size: 13px; color: var(--text2); line-height: 1.65; white-space: pre-wrap; }
-
-    .note-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 15px; margin-bottom: 8px; position: relative; overflow: hidden; }
-    .note-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, var(--orange), var(--orange2)); }
-    .note-text { font-size: 14px; line-height: 1.6; margin-bottom: 8px; white-space: pre-wrap; }
-    .note-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
-
-    .tag { font-family: var(--mono); font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.5px; }
-    .tag-o { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-b); }
-    .tag-g { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-b); }
-    .tag-r { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-b); }
-    .tag-a { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-b); }
-    .tag-b { background: var(--blue-dim); color: var(--blue); }
-
-    .trades-grid { display: flex; flex-wrap: wrap; gap: 7px; }
-    .trade-chip { padding: 6px 12px; border-radius: 20px; font-family: var(--mono); font-size: 10px; font-weight: 600; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); transition: all 0.15s; }
-    .trade-chip.on { border-color: var(--orange-b); background: var(--orange-dim); color: var(--orange); }
-    .trade-chip-d { padding: 3px 10px; border-radius: 20px; font-family: var(--mono); font-size: 10px; font-weight: 600; background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-b); }
-
-    .photo-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    .photo-thumb { position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border2); flex-shrink: 0; }
-    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-remove { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.75); border: none; color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .photo-add-lbl { width: 80px; height: 80px; border: 2px dashed var(--border2); border-radius: 8px; background: var(--surface2); color: var(--muted); font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
-    .modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-height: 93vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); animation: slideUp 0.25s cubic-bezier(0.32,0.72,0,1); }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 12px auto 0; }
-    .modal-header { padding: 14px 20px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
-    .modal-title { font-family: var(--mono); font-size: 11px; color: var(--orange); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
-    .modal-close { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); font-size: 18px; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-    .modal-body { padding: 18px 20px; }
-    .modal-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); }
-    .modal-tab { flex: 1; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-family: var(--mono); font-size: 10px; padding: 12px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; transition: all 0.15s; }
-    .modal-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
-
-    .filter-row { display: flex; padding: 12px 18px; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .filter-row::-webkit-scrollbar { display: none; }
-    .fpill { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--muted); font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 6px 14px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
-    .fpill.active { background: var(--orange-dim); border-color: var(--orange-b); color: var(--orange); }
-
-    .detail-tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
-    .detail-tab { flex: 1; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-family: var(--mono); font-size: 10px; padding: 13px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; transition: all 0.15s; }
-    .detail-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
-
-    .toast { position: fixed; bottom: calc(var(--nav-h) + 16px); left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border2); color: var(--text); font-family: var(--mono); font-size: 12px; font-weight: 600; padding: 11px 20px; border-radius: 30px; z-index: 300; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 8px; }
-    .toast.show { opacity: 1; }
-
-    .empty { text-align: center; padding: 55px 24px; color: var(--muted); font-size: 13px; line-height: 1.8; }
-    .empty-icon { font-size: 44px; margin-bottom: 14px; display: block; }
-    .empty-title { font-size: 16px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
-
-    .today-hero { background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%); margin: 14px 18px 0; border-radius: var(--r); border: 1px solid var(--border); padding: 18px; position: relative; overflow: hidden; }
-    .today-hero::after { content: '🏗️'; position: absolute; right: -8px; bottom: -10px; font-size: 72px; opacity: 0.06; pointer-events: none; }
-    .today-greeting { font-family: var(--mono); font-size: 10px; color: var(--orange); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-    .today-date-big { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
-    .today-stats { display: flex; gap: 20px; flex-wrap: wrap; }
-    .ts-val { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--orange); line-height: 1; }
-    .ts-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-
-    .flex-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .hint { font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.7; margin-top: 10px; }
-    .error-msg { font-family: var(--mono); font-size: 11px; color: var(--red); margin-top: 8px; }
-    pre.preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: var(--mono); font-size: 10px; padding: 12px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; margin-bottom: 14px; }
-
-    .cl-phase-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 10px; overflow: hidden; }
-    .cl-phase-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
-    .cl-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; transition: opacity 0.2s; }
-    .cl-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border2); background: none; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; transition: all 0.2s; }
-    .cl-check.on { background: var(--green); border-color: var(--green); color: #000; }
+    html,body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100vh;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+    input,textarea,select,button{font-family:inherit;-webkit-appearance:none;appearance:none}
+    textarea{resize:vertical}
+    .hz{height:4px;background:repeating-linear-gradient(-45deg,var(--or) 0,var(--or) 8px,#000 8px,#000 16px);opacity:.7}
+    .nav{position:fixed;bottom:0;left:0;right:0;height:var(--nh);background:var(--sf);border-top:1px solid var(--bd);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+    .nb{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:8px 0;position:relative}
+    .ni{font-size:22px;line-height:1;transition:transform .2s}
+    .nl{font-family:var(--mono);font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--mu);transition:color .2s}
+    .nb.on .nl{color:var(--or)}.nb.on .ni{transform:scale(1.15)}
+    .np{position:absolute;top:8px;width:4px;height:4px;background:var(--or);border-radius:50%;display:none}
+    .nb.on .np{display:block}
+    .sc{display:none;min-height:100vh;padding-bottom:calc(var(--nh) + 20px)}
+    .sc.on{display:block;animation:fu .2s ease}
+    @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .tb{background:linear-gradient(135deg,#1A1D24,#111318);padding:18px 20px 16px;padding-top:calc(18px + env(safe-area-inset-top));border-bottom:1px solid var(--bd);display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+    .te{font-family:var(--mono);font-size:9px;color:var(--or);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+    .te::before{content:'';display:inline-block;width:6px;height:6px;background:var(--or);border-radius:50%}
+    .tt{font-size:24px;font-weight:800;letter-spacing:-.8px;color:var(--tx)}
+    .sec{padding:16px 18px 0}
+    .sh{font-family:var(--mono);font-size:10px;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+    .sh::before{content:'//';color:var(--or);margin-right:6px;font-weight:700}
+    .btn{border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:700;padding:10px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+    .btn:active{transform:scale(.97)}
+    .bo{background:var(--or);color:#fff}.bg{background:var(--sf2);border:1px solid var(--bd2);color:var(--tx2)}
+    .br{background:var(--rdd);border:1px solid var(--rb);color:var(--rd)}
+    .bs{padding:6px 12px;font-size:11px;border-radius:6px}.bx{padding:4px 10px;font-size:10px;border-radius:5px;font-family:var(--mono)}
+    .bl{display:block;text-align:center;padding:14px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;transition:all .15s}
+    .blo{background:var(--or);color:#fff}.blg{background:var(--sf2);border:1px solid var(--bd2);color:var(--tx2);margin-top:10px}
+    .fg{margin-bottom:16px}.fl{display:block;font-family:var(--mono);font-size:10px;color:var(--tx2);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+    .fi{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-family:var(--sans);font-size:14px;padding:10px 13px;width:100%;transition:border-color .15s}
+    .fi:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px var(--od)}
+    .fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    textarea.fi{min-height:85px;line-height:1.5}
+    .cp{background:var(--sf);border:1px solid var(--ob);border-radius:var(--r);padding:18px;margin-bottom:16px}
+    .jc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:15px 16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .15s;position:relative;overflow:hidden}
+    .jc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+    .jc.sa::before{background:var(--or)}.jc.sc2::before{background:var(--gr)}.jc.sh2::before{background:var(--am)}
+    .jc:active{background:var(--sf2)}
+    .jn{font-size:15px;font-weight:700;margin-bottom:4px;letter-spacing:-.3px}
+    .jm{display:flex;gap:8px;flex-wrap:wrap}.jm span{font-family:var(--mono);font-size:10px;color:var(--tx2)}
+    .rw{position:relative;flex-shrink:0}.rw svg{display:block;transform:rotate(-90deg)}
+    .rt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700}
+    .pi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;position:relative;overflow:hidden}
+    .pi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+    .ph::before{background:var(--rd);box-shadow:2px 0 8px var(--rd)}.pm::before{background:var(--am)}.pl::before{background:var(--gr)}
+    .pi.dn{opacity:.4}
+    .pc{width:24px;height:24px;border-radius:50%;border:2px solid var(--bd2);background:none;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+    .pc.ck{background:var(--gr);border-color:var(--gr);color:#000;font-weight:700;box-shadow:0 0 12px var(--gb)}
+    .pt{font-size:14px;font-weight:600;margin-bottom:4px}.pt.dn{text-decoration:line-through;color:var(--mu)}
+    .pm2{font-family:var(--mono);font-size:10px;color:var(--mu);display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+    .pp{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:20px}
+    .pp.h{background:var(--rdd);color:var(--rd);border:1px solid var(--rb)}.pp.m{background:var(--amd);color:var(--am);border:1px solid var(--amb)}.pp.l{background:var(--gd);color:var(--gr);border:1px solid var(--gb)}
+    .ss{display:flex;gap:10px;padding:14px 18px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .ss::-webkit-scrollbar{display:none}
+    .sk{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;flex-shrink:0;min-width:88px;text-align:center}
+    .sv{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--or);line-height:1}
+    .sl{font-family:var(--mono);font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+    .rc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+    .rh{padding:14px 15px;display:flex;align-items:flex-start;justify-content:space-between;cursor:pointer;gap:10px}
+    .rh:active{background:var(--sf2)}
+    .rd2{font-family:var(--mono);font-size:13px;font-weight:700}
+    .rcs{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+    .ch{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:20px;background:var(--od);color:var(--or);border:1px solid var(--ob);font-weight:600}
+    .rb2{padding:14px 15px;border-top:1px solid var(--bd);display:none}
+    .rb2.op{display:block}
+    .rl{font-family:var(--mono);font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+    .rv{font-size:13px;color:var(--tx2);line-height:1.65;white-space:pre-wrap}
+    .nc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 15px;margin-bottom:8px;position:relative;overflow:hidden}
+    .nc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--or),var(--or2))}
+    .nt{font-size:14px;line-height:1.6;margin-bottom:8px;white-space:pre-wrap}
+    .nm{font-family:var(--mono);font-size:10px;color:var(--mu);display:flex;align-items:center;gap:8px}
+    .tg{font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.5px}
+    .to{background:var(--od);color:var(--or);border:1px solid var(--ob)}.tg2{background:var(--gd);color:var(--gr);border:1px solid var(--gb)}.ta{background:var(--amd);color:var(--am);border:1px solid var(--amb)}.tb2{background:var(--bld);color:var(--bl)}
+    .trd{display:flex;flex-wrap:wrap;gap:7px}
+    .tc{padding:6px 12px;border-radius:20px;font-family:var(--mono);font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--bd2);background:var(--sf2);color:var(--mu);transition:all .15s}
+    .tc.on{border-color:var(--ob);background:var(--od);color:var(--or)}
+    .tcd{padding:3px 10px;border-radius:20px;font-family:var(--mono);font-size:10px;font-weight:600;background:var(--od);color:var(--or);border:1px solid var(--ob)}
+    .ps{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .ph2{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid var(--bd2);flex-shrink:0}
+    .ph2 img{width:100%;height:100%;object-fit:cover}
+    .pr{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.75);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .pa{width:80px;height:80px;border:2px dashed var(--bd2);border-radius:8px;background:var(--sf2);color:var(--mu);font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .mo{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+    .md{background:var(--sf);border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom);animation:su .25s cubic-bezier(.32,.72,0,1)}
+    @keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .mh2{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:12px auto 0}
+    .mh{padding:14px 20px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--sf);z-index:1}
+    .mt{font-family:var(--mono);font-size:11px;color:var(--or);letter-spacing:2px;text-transform:uppercase;font-weight:700}
+    .mc{background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-size:18px;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .mb{padding:18px 20px}
+    .mts{display:flex;border-bottom:1px solid var(--bd);background:var(--sf)}
+    .mta{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--mu);font-family:var(--mono);font-size:10px;padding:12px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-weight:600;transition:all .15s}
+    .mta.on{color:var(--or);border-bottom-color:var(--or)}
+    .fr2{display:flex;padding:12px 18px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .fr2::-webkit-scrollbar{display:none}
+    .fp{background:var(--sf2);border:1px solid var(--bd);border-radius:20px;color:var(--mu);font-family:var(--mono);font-size:10px;font-weight:600;padding:6px 14px;cursor:pointer;white-space:nowrap;transition:all .15s}
+    .fp.on{background:var(--od);border-color:var(--ob);color:var(--or)}
+    .dt{display:flex;background:var(--sf);border-bottom:1px solid var(--bd)}
+    .dta{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--mu);font-family:var(--mono);font-size:10px;padding:13px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-weight:600;transition:all .15s}
+    .dta.on{color:var(--or);border-bottom-color:var(--or)}
+    .toast{position:fixed;bottom:calc(var(--nh) + 16px);left:50%;transform:translateX(-50%);background:var(--sf);border:1px solid var(--bd2);color:var(--tx);font-family:var(--mono);font-size:12px;font-weight:600;padding:11px 20px;border-radius:30px;z-index:300;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;box-shadow:0 8px 32px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px}
+    .toast.on{opacity:1}
+    .em{text-align:center;padding:55px 24px;color:var(--mu);font-size:13px;line-height:1.8}
+    .ei{font-size:44px;margin-bottom:14px;display:block}.et{font-size:16px;font-weight:700;color:var(--tx2);margin-bottom:6px}
+    .th{background:linear-gradient(135deg,var(--sf),var(--sf2));margin:14px 18px 0;border-radius:var(--r);border:1px solid var(--bd);padding:18px;position:relative;overflow:hidden}
+    .th::after{content:'';position:absolute;right:-8px;bottom:-10px;font-size:72px;opacity:.06;pointer-events:none}
+    .tg3{font-family:var(--mono);font-size:10px;color:var(--or);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+    .td{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:12px}
+    .ts{display:flex;gap:20px;flex-wrap:wrap}.tv{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--or);line-height:1}.tl{font-family:var(--mono);font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+    .frow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .hint{font-family:var(--mono);font-size:10px;color:var(--mu);line-height:1.7;margin-top:10px}
+    .err{font-family:var(--mono);font-size:11px;color:var(--rd);margin-top:8px}
+    pre.pv{background:var(--bg);border:1px solid var(--bd);border-radius:8px;color:var(--mu);font-family:var(--mono);font-size:10px;padding:12px;white-space:pre-wrap;max-height:200px;overflow-y:auto;margin-bottom:14px}
+    .ci{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--sf);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px}
+    .cc{width:22px;height:22px;border-radius:50%;border:2px solid var(--bd2);background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all .2s}
+    .cc.on{background:var(--gr);border-color:var(--gr);color:#000}
   </style>
 </head>
 <body>
-
-<div class="toast" id="toast"><span id="ti">✓</span><span id="tm">Saved</span></div>
+<div class="toast" id="toast"><span id="ti">v</span><span id="tm">Saved</span></div>
 
 <!-- TODAY -->
-<div class="screen active" id="screen-today">
-  <div class="top-bar">
-    <div><div class="top-bar-eyebrow">Site Boss</div><div class="top-bar-title">Dashboard</div></div>
-    <button class="btn btn-ghost btn-sm" onclick="showBackupModal()">⬇ Backup</button>
-  </div>
-  <div class="hazard-stripe"></div>
-  <div id="todayContent"></div>
+<div class="sc on" id="sc-today">
+  <div class="tb"><div><div class="te">Site Boss</div><div class="tt">Dashboard</div></div><button class="btn bg bs" onclick="showBackup()">Backup</button></div>
+  <div class="hz"></div>
+  <div id="today-content"></div>
 </div>
 
 <!-- JOBS -->
-<div class="screen" id="screen-jobs">
-  <div class="top-bar">
-    <div><div class="top-bar-eyebrow">Site Boss</div><div class="top-bar-title">Jobs</div></div>
-    <button class="btn btn-orange btn-sm" onclick="showAddJob()">+ New Job</button>
+<div class="sc" id="sc-jobs">
+  <div class="tb"><div><div class="te">Site Boss</div><div class="tt">Jobs</div></div><button class="btn bo bs" onclick="showAddJob()">+ New Job</button></div>
+  <div class="hz"></div>
+  <div class="fr2">
+    <button class="fp on" data-f="all" onclick="setJF(this)">All <span id="jc-all">0</span></button>
+    <button class="fp" data-f="active" onclick="setJF(this)">Active <span id="jc-active">0</span></button>
+    <button class="fp" data-f="onhold" onclick="setJF(this)">On Hold <span id="jc-onhold">0</span></button>
+    <button class="fp" data-f="complete" onclick="setJF(this)">Done <span id="jc-complete">0</span></button>
   </div>
-  <div class="hazard-stripe"></div>
-  <div class="filter-row">
-    <button class="fpill active" data-f="all" onclick="setJobFilter(this)">All <span id="jc-all">0</span></button>
-    <button class="fpill" data-f="active" onclick="setJobFilter(this)">Active <span id="jc-active">0</span></button>
-    <button class="fpill" data-f="onhold" onclick="setJobFilter(this)">On Hold <span id="jc-onhold">0</span></button>
-    <button class="fpill" data-f="complete" onclick="setJobFilter(this)">Done <span id="jc-complete">0</span></button>
-  </div>
-  <div class="section" style="padding-top:4px">
-    <div id="addJobForm" style="display:none" class="card-panel">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">New Job</div>
-      <div class="form-group"><label class="form-label">Job Name *</label><input class="form-input" id="nj-name" placeholder="e.g. 124 Oak St Remodel" /></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Client</label><input class="form-input" id="nj-client" placeholder="Owner name" /></div>
-        <div class="form-group"><label class="form-label">Status</label>
-          <select class="form-input" id="nj-status"><option value="active">Active</option><option value="onhold">On Hold</option><option value="complete">Complete</option></select>
-        </div>
-      </div>
-      <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="nj-addr" placeholder="Site address" /></div>
-      <div class="form-group"><label class="form-label">Job Number</label><input class="form-input" id="nj-num" placeholder="JOB-2026-001" /></div>
-      <div class="flex-row">
-        <button class="btn btn-orange" onclick="createJob()">Create Job</button>
-        <button class="btn btn-ghost" onclick="hideAddJob()">Cancel</button>
-      </div>
+  <div class="sec" style="padding-top:4px">
+    <div id="add-job-form" style="display:none" class="cp">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--or);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">New Job</div>
+      <div class="fg"><label class="fl">Job Name *</label><input class="fi" id="nj-n" placeholder="e.g. 124 Oak St Remodel" /></div>
+      <div class="fr"><div class="fg"><label class="fl">Client</label><input class="fi" id="nj-c" placeholder="Owner name" /></div><div class="fg"><label class="fl">Status</label><select class="fi" id="nj-s"><option value="active">Active</option><option value="onhold">On Hold</option><option value="complete">Complete</option></select></div></div>
+      <div class="fg"><label class="fl">Address</label><input class="fi" id="nj-a" placeholder="Site address" /></div>
+      <div class="fg"><label class="fl">Job Number</label><input class="fi" id="nj-num" placeholder="JOB-2026-001" /></div>
+      <div class="frow"><button class="btn bo" onclick="createJob()">Create Job</button><button class="btn bg" onclick="hideAddJob()">Cancel</button></div>
     </div>
-    <div id="jobsList"></div>
+    <div id="jobs-list"></div>
   </div>
 </div>
 
-<!-- JOB DETAIL -->
-<div class="screen" id="screen-detail">
-  <div class="top-bar">
+<!-- DETAIL -->
+<div class="sc" id="sc-detail">
+  <div class="tb">
     <div style="display:flex;align-items:center;gap:10px">
-      <button onclick="goTo('jobs')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:8px;width:34px;height:34px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
-      <div>
-        <div class="top-bar-eyebrow" style="margin-bottom:2px" id="d-jobnum"></div>
-        <div class="top-bar-title" id="d-jobname" style="font-size:18px"></div>
-      </div>
+      <button onclick="goTo('jobs')" style="background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);border-radius:8px;width:34px;height:34px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#8249;</button>
+      <div><div class="te" id="d-num"></div><div class="tt" id="d-name" style="font-size:18px"></div></div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="showEditJob()">Edit</button>
+    <button class="btn bg bs" onclick="showEditJob()">Edit</button>
   </div>
-  <div class="hazard-stripe"></div>
-  <div class="detail-tabs">
-    <button class="detail-tab active" id="dtab-punch" onclick="switchDTab('punch')">🔨 Punch List</button>
-    <button class="detail-tab" id="dtab-log" onclick="switchDTab('log')">📋 Daily Log</button>
+  <div class="hz"></div>
+  <div class="dt">
+    <button class="dta on" id="dt-punch" onclick="switchTab('punch')">Punch List</button>
+    <button class="dta" id="dt-log" onclick="switchTab('log')">Daily Log</button>
   </div>
   <div id="d-punch">
-    <div class="stats-scroll" id="d-punch-stats"></div>
-    <div class="section" style="padding-top:0">
-      <div class="filter-row" style="padding:0 0 12px">
-        <button class="fpill active" data-pf="open" onclick="setPunchFilter(this)">Open</button>
-        <button class="fpill" data-pf="all" onclick="setPunchFilter(this)">All</button>
-        <button class="fpill" data-pf="done" onclick="setPunchFilter(this)">Done</button>
+    <div class="ss" id="d-punch-stats"></div>
+    <div class="sec" style="padding-top:0">
+      <div class="fr2" style="padding:0 0 12px">
+        <button class="fp on" data-pf="open" onclick="setPF(this)">Open</button>
+        <button class="fp" data-pf="all" onclick="setPF(this)">All</button>
+        <button class="fp" data-pf="done" onclick="setPF(this)">Done</button>
       </div>
-      <div class="section-head">Punch Items <button class="btn btn-orange btn-sm" onclick="showAddPunch()">+ Add</button></div>
-      <div id="punchList"></div>
+      <div class="sh">Punch Items <button class="btn bo bs" onclick="showAddPunch()">+ Add</button></div>
+      <div id="punch-list"></div>
     </div>
   </div>
   <div id="d-log" style="display:none">
-    <div class="stats-scroll" id="d-log-stats"></div>
-    <div class="section" style="padding-top:0">
-      <div class="section-head">Daily Reports <button class="btn btn-orange btn-sm" onclick="addTodayReport()">+ Today</button></div>
-      <div id="reportsList"></div>
+    <div class="ss" id="d-log-stats"></div>
+    <div class="sec" style="padding-top:0">
+      <div class="sh">Daily Reports
+        <div style="display:flex;gap:6px">
+          <button class="btn bo bs" onclick="addToday()">+ Today</button>
+          <button class="btn bg bs" onclick="openPickDate()">+ Past Date</button>
+        </div>
+      </div>
+      <div id="reports-list"></div>
     </div>
   </div>
 </div>
 
 <!-- CHECKLIST -->
-<div class="screen" id="screen-checklist">
-  <div class="top-bar">
-    <div><div class="top-bar-eyebrow">Site Boss</div><div class="top-bar-title">Checklist</div></div>
-    <button class="btn btn-red btn-sm" onclick="resetChecklist()">Reset</button>
-  </div>
-  <div class="hazard-stripe"></div>
-  <div class="section" style="padding-top:14px">
-    <div class="form-group">
-      <label class="form-label">Select Job</label>
-      <select class="form-input" id="cl-job" onchange="loadChecklist()"><option value="">-- Select a job --</option></select>
-    </div>
-    <div id="cl-progress" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px">
+<div class="sc" id="sc-checklist">
+  <div class="tb"><div><div class="te">Site Boss</div><div class="tt">Checklist</div></div><button class="btn br bs" onclick="resetCL()">Reset</button></div>
+  <div class="hz"></div>
+  <div class="sec" style="padding-top:14px">
+    <div class="fg"><label class="fl">Select Job</label><select class="fi" id="cl-job" onchange="loadCL()"><option value="">-- Select a job --</option></select></div>
+    <div id="cl-progress" style="display:none;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Overall Progress</div><div style="font-size:22px;font-weight:800;color:var(--orange)" id="cl-pct">0%</div></div>
-        <div style="text-align:right"><div style="font-family:var(--mono);font-size:18px;font-weight:700" id="cl-frac">0/0</div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase">items done</div></div>
+        <div><div style="font-family:var(--mono);font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Overall Progress</div><div style="font-size:22px;font-weight:800;color:var(--or)" id="cl-pct">0%</div></div>
+        <div style="text-align:right"><div style="font-family:var(--mono);font-size:18px;font-weight:700" id="cl-frac">0/0</div><div style="font-family:var(--mono);font-size:9px;color:var(--mu);text-transform:uppercase">items done</div></div>
       </div>
-      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div id="cl-bar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:4px;transition:width 0.4s;width:0%"></div></div>
+      <div style="height:8px;background:var(--bd);border-radius:4px;overflow:hidden"><div id="cl-bar" style="height:100%;background:linear-gradient(90deg,var(--or),var(--or2));border-radius:4px;transition:width .4s;width:0%"></div></div>
     </div>
     <div id="cl-content"></div>
   </div>
 </div>
 
 <!-- NOTES -->
-<div class="screen" id="screen-notes">
-  <div class="top-bar">
-    <div><div class="top-bar-eyebrow">Site Boss</div><div class="top-bar-title">Notes</div></div>
-    <button class="btn btn-orange btn-sm" onclick="showAddNote()">+ Note</button>
-  </div>
-  <div class="hazard-stripe"></div>
-  <div class="section" style="padding-top:14px">
-    <div id="addNoteForm" style="display:none" class="card-panel">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">New Note</div>
-      <div class="form-group"><label class="form-label">Note *</label><textarea class="form-input" id="nn-text" rows="4" placeholder="What do you need to remember..."></textarea></div>
-      <div class="form-group"><label class="form-label">Tag</label><input class="form-input" id="nn-tag" placeholder="e.g. Follow Up, RFI, Materials" /></div>
-      <div class="flex-row">
-        <button class="btn btn-orange" onclick="createNote()">Save Note</button>
-        <button class="btn btn-ghost" onclick="hideAddNote()">Cancel</button>
-      </div>
+<div class="sc" id="sc-notes">
+  <div class="tb"><div><div class="te">Site Boss</div><div class="tt">Notes</div></div><button class="btn bo bs" onclick="showAddNote()">+ Note</button></div>
+  <div class="hz"></div>
+  <div class="sec" style="padding-top:14px">
+    <div id="add-note-form" style="display:none" class="cp">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--or);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">New Note</div>
+      <div class="fg"><label class="fl">Note *</label><textarea class="fi" id="nn-t" rows="4" placeholder="What do you need to remember..."></textarea></div>
+      <div class="fg"><label class="fl">Tag</label><input class="fi" id="nn-tag" placeholder="e.g. Follow Up, RFI, Materials" /></div>
+      <div class="frow"><button class="btn bo" onclick="createNote()">Save Note</button><button class="btn bg" onclick="hideAddNote()">Cancel</button></div>
     </div>
-    <div id="notesList"></div>
+    <div id="notes-list"></div>
   </div>
 </div>
 
 <!-- NAV -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-today" onclick="goTo('today')"><div class="nav-pip"></div><span class="nav-icon">📋</span><span class="nav-label">Today</span></button>
-  <button class="nav-btn" id="nav-jobs" onclick="goTo('jobs')"><div class="nav-pip"></div><span class="nav-icon">🏗️</span><span class="nav-label">Jobs</span></button>
-  <button class="nav-btn" id="nav-checklist" onclick="goTo('checklist')"><div class="nav-pip"></div><span class="nav-icon">☑️</span><span class="nav-label">Checklist</span></button>
-  <button class="nav-btn" id="nav-notes" onclick="goTo('notes')"><div class="nav-pip"></div><span class="nav-icon">📝</span><span class="nav-label">Notes</span></button>
+<nav class="nav">
+  <button class="nb on" id="nb-today" onclick="goTo('today')"><div class="np"></div><span class="ni">📋</span><span class="nl">Today</span></button>
+  <button class="nb" id="nb-jobs" onclick="goTo('jobs')"><div class="np"></div><span class="ni">🏗️</span><span class="nl">Jobs</span></button>
+  <button class="nb" id="nb-checklist" onclick="goTo('checklist')"><div class="np"></div><span class="ni">☑️</span><span class="nl">Checklist</span></button>
+  <button class="nb" id="nb-notes" onclick="goTo('notes')"><div class="np"></div><span class="ni">📝</span><span class="nl">Notes</span></button>
 </nav>
 
-<!-- MODALS -->
-<div class="modal-overlay" id="m-editjob" style="display:none" onclick="if(event.target===this)closeModal('m-editjob')">
-  <div class="modal"><div class="modal-handle"></div>
-    <div class="modal-header"><span class="modal-title">Edit Job</span><button class="modal-close" onclick="closeModal('m-editjob')">×</button></div>
-    <div class="modal-body">
-      <div class="form-group"><label class="form-label">Job Name</label><input class="form-input" id="ej-name" /></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Client</label><input class="form-input" id="ej-client" /></div>
-        <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="ej-status"><option value="active">Active</option><option value="onhold">On Hold</option><option value="complete">Complete</option></select></div>
-      </div>
-      <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="ej-addr" /></div>
-      <div class="form-group"><label class="form-label">Job Number</label><input class="form-input" id="ej-num" /></div>
-      <div class="flex-row">
-        <button class="btn btn-orange" onclick="saveJobEdit()">Save</button>
-        <button class="btn btn-ghost" onclick="closeModal('m-editjob')">Cancel</button>
-        <button class="btn btn-red btn-sm" onclick="deleteCurrentJob()" style="margin-left:auto">Delete Job</button>
-      </div>
+<!-- MODAL: Edit Job -->
+<div class="mo" id="m-ej" style="display:none" onclick="if(event.target===this)closeM('m-ej')">
+  <div class="md"><div class="mh2"></div><div class="mh"><span class="mt">Edit Job</span><button class="mc" onclick="closeM('m-ej')">x</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">Job Name</label><input class="fi" id="ej-n" /></div>
+      <div class="fr"><div class="fg"><label class="fl">Client</label><input class="fi" id="ej-c" /></div><div class="fg"><label class="fl">Status</label><select class="fi" id="ej-s"><option value="active">Active</option><option value="onhold">On Hold</option><option value="complete">Complete</option></select></div></div>
+      <div class="fg"><label class="fl">Address</label><input class="fi" id="ej-a" /></div>
+      <div class="fg"><label class="fl">Job Number</label><input class="fi" id="ej-num" /></div>
+      <div class="frow"><button class="btn bo" onclick="saveJobEdit()">Save</button><button class="btn bg" onclick="closeM('m-ej')">Cancel</button><button class="btn br bs" onclick="delJob()" style="margin-left:auto">Delete Job</button></div>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="m-punch" style="display:none" onclick="if(event.target===this)closeModal('m-punch')">
-  <div class="modal"><div class="modal-handle"></div>
-    <div class="modal-header"><span class="modal-title" id="pm-title">Add Item</span><button class="modal-close" onclick="closeModal('m-punch')">×</button></div>
-    <div class="modal-body">
-      <div class="form-group"><label class="form-label">What needs to get done *</label><input class="form-input" id="pm-title-in" placeholder="Describe the work item" /></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Priority</label><select class="form-input" id="pm-pri"><option value="high">🔴 High</option><option value="med" selected>🟡 Medium</option><option value="low">🟢 Low</option></select></div>
-        <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" type="date" id="pm-due" /></div>
-      </div>
-      <div class="form-group"><label class="form-label">Assigned To</label><input class="form-input" id="pm-assign" placeholder="Who owns this" /></div>
-      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="pm-notes" rows="3" placeholder="More details..."></textarea></div>
-      <div class="flex-row">
-        <button class="btn btn-orange" onclick="savePunch()">Save Item</button>
-        <button class="btn btn-ghost" onclick="closeModal('m-punch')">Cancel</button>
-      </div>
+<!-- MODAL: Punch -->
+<div class="mo" id="m-punch" style="display:none" onclick="if(event.target===this)closeM('m-punch')">
+  <div class="md"><div class="mh2"></div><div class="mh"><span class="mt" id="pm-t">Add Item</span><button class="mc" onclick="closeM('m-punch')">x</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">What needs to get done *</label><input class="fi" id="pm-ti" placeholder="Describe the work item" /></div>
+      <div class="fr"><div class="fg"><label class="fl">Priority</label><select class="fi" id="pm-p"><option value="high">High - Urgent</option><option value="med" selected>Medium</option><option value="low">Low</option></select></div><div class="fg"><label class="fl">Due Date</label><input class="fi" type="date" id="pm-d" /></div></div>
+      <div class="fg"><label class="fl">Assigned To</label><input class="fi" id="pm-a" placeholder="Who owns this" /></div>
+      <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="pm-n" rows="3" placeholder="More details..."></textarea></div>
+      <div class="frow"><button class="btn bo" onclick="savePunch()">Save Item</button><button class="btn bg" onclick="closeM('m-punch')">Cancel</button></div>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="m-report" style="display:none" onclick="if(event.target===this)closeModal('m-report')">
-  <div class="modal"><div class="modal-handle"></div>
-    <div class="modal-header"><span class="modal-title" id="rm-title">Daily Report</span><button class="modal-close" onclick="closeModal('m-report')">×</button></div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Weather</label><select class="form-input" id="rm-weather"><option value="">--</option><option>Sunny</option><option>Partly Cloudy</option><option>Cloudy</option><option>Rainy</option><option>Windy</option><option>Snow</option><option>Fog</option></select></div>
-        <div class="form-group"><label class="form-label">Temp (F)</label><input class="form-input" type="number" id="rm-temp" placeholder="72" /></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Workers on Site</label><input class="form-input" type="number" id="rm-workers" placeholder="0" /></div>
-        <div class="form-group"><label class="form-label">Hours Worked</label><input class="form-input" type="number" id="rm-hours" placeholder="8" /></div>
-      </div>
-      <div class="form-group"><label class="form-label">Trades on Site</label><div class="trades-grid" id="rm-trades"></div></div>
-      <div class="form-group"><label class="form-label">Work Performed</label><textarea class="form-input" id="rm-work" rows="4" placeholder="What got done today..."></textarea></div>
-      <div class="form-group"><label class="form-label">Issues / Delays</label><textarea class="form-input" id="rm-issues" rows="2" placeholder="Problems, RFIs, delays..."></textarea></div>
-      <div class="form-group"><label class="form-label">Materials Delivered</label><textarea class="form-input" id="rm-materials" rows="2" placeholder="What was delivered..."></textarea></div>
-      <div class="form-group"><label class="form-label">Next Day Plan</label><textarea class="form-input" id="rm-nextday" rows="2" placeholder="What's happening tomorrow..."></textarea></div>
-      <div class="form-group">
-        <label class="form-label">Photos <span style="color:var(--muted);font-size:9px;text-transform:none;letter-spacing:0">(tap + for each photo)</span></label>
-        <div class="photo-strip" id="rm-photos"></div>
-        <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoAdd(this)" />
-      </div>
-      <div class="flex-row">
-        <button class="btn btn-orange" onclick="saveReport()">Save Report</button>
-        <button class="btn btn-ghost" onclick="closeModal('m-report')">Cancel</button>
-      </div>
+<!-- MODAL: Report -->
+<div class="mo" id="m-report" style="display:none" onclick="if(event.target===this)closeM('m-report')">
+  <div class="md"><div class="mh2"></div><div class="mh"><span class="mt" id="rm-t">Daily Report</span><button class="mc" onclick="closeM('m-report')">x</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">Report Date</label><input class="fi" type="date" id="rm-date" /></div>
+      <div class="fr"><div class="fg"><label class="fl">Weather</label><select class="fi" id="rm-w"><option value="">--</option><option>Sunny</option><option>Partly Cloudy</option><option>Cloudy</option><option>Rainy</option><option>Windy</option><option>Snow</option><option>Fog</option></select></div><div class="fg"><label class="fl">Temp (F)</label><input class="fi" type="number" id="rm-temp" placeholder="72" /></div></div>
+      <div class="fr"><div class="fg"><label class="fl">Workers on Site</label><input class="fi" type="number" id="rm-wk" placeholder="0" /></div><div class="fg"><label class="fl">Hours Worked</label><input class="fi" type="number" id="rm-hr" placeholder="8" /></div></div>
+      <div class="fg"><label class="fl">Trades on Site</label><div class="trd" id="rm-trades"></div></div>
+      <div class="fg"><label class="fl">Work Performed</label><textarea class="fi" id="rm-work" rows="4" placeholder="What got done today..."></textarea></div>
+      <div class="fg"><label class="fl">Issues / Delays</label><textarea class="fi" id="rm-iss" rows="2" placeholder="Problems, RFIs, delays..."></textarea></div>
+      <div class="fg"><label class="fl">Materials Delivered</label><textarea class="fi" id="rm-mat" rows="2" placeholder="What was delivered..."></textarea></div>
+      <div class="fg"><label class="fl">Next Day Plan</label><textarea class="fi" id="rm-nxt" rows="2" placeholder="What happens tomorrow..."></textarea></div>
+      <div class="fg"><label class="fl">Photos <span style="color:var(--mu);font-size:9px;text-transform:none;letter-spacing:0">(tap + for each photo)</span></label><div class="ps" id="rm-photos"></div><input type="file" id="photo-in" accept="image/*" style="display:none" onchange="addPhoto(this)" /></div>
+      <div class="frow"><button class="btn bo" onclick="saveReport()">Save Report</button><button class="btn bg" onclick="closeM('m-report')">Cancel</button></div>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="m-email" style="display:none" onclick="if(event.target===this)closeModal('m-email')">
-  <div class="modal"><div class="modal-handle"></div>
-    <div class="modal-header"><span class="modal-title">Email Report</span><button class="modal-close" onclick="closeModal('m-email')">×</button></div>
-    <div class="modal-body">
-      <div class="form-group"><label class="form-label">Subject</label><div class="form-input" id="em-subj" style="color:var(--text2)"></div></div>
-      <label class="form-label">Preview</label>
-      <pre class="preview" id="em-body"></pre>
-      <a class="btn-link btn-link-orange" id="em-link" href="#" target="_blank">Open in Mail App</a>
-      <button class="btn-link btn-link-ghost" onclick="closeModal('m-email')" style="border:none;cursor:pointer;margin-top:10px">Close</button>
+<!-- MODAL: Email -->
+<div class="mo" id="m-email" style="display:none" onclick="if(event.target===this)closeM('m-email')">
+  <div class="md"><div class="mh2"></div><div class="mh"><span class="mt">Email Report</span><button class="mc" onclick="closeM('m-email')">x</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">Subject</label><div class="fi" id="em-s" style="color:var(--tx2)"></div></div>
+      <label class="fl">Preview</label><pre class="pv" id="em-b"></pre>
+      <a class="bl blo" id="em-l" href="#" target="_blank">Open in Mail App</a>
+      <button class="bl blg" onclick="closeM('m-email')" style="border:none;cursor:pointer;margin-top:10px">Close</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="m-backup" style="display:none" onclick="if(event.target===this)closeModal('m-backup')">
-  <div class="modal"><div class="modal-handle"></div>
-    <div class="modal-header"><span class="modal-title">Backup & Restore</span><button class="modal-close" onclick="closeModal('m-backup')">×</button></div>
-    <div class="modal-tabs">
-      <button class="modal-tab active" id="bt-save" onclick="switchBTab('save')">Save Backup</button>
-      <button class="modal-tab" id="bt-load" onclick="switchBTab('load')">Load Backup</button>
+<!-- MODAL: Pick Date -->
+<div class="mo" id="m-date" style="display:none" onclick="if(event.target===this)closeM('m-date')">
+  <div class="md"><div class="mh2"></div><div class="mh"><span class="mt">Pick a Date</span><button class="mc" onclick="closeM('m-date')">x</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">Date for this Report</label><input class="fi" type="date" id="pd-date" /></div>
+      <div class="frow"><button class="btn bo" onclick="confirmDate()">Open Log</button><button class="btn bg" onclick="closeM('m-date')">Cancel</button></div>
     </div>
-    <div class="modal-body">
+  </div>
+</div>
+
+<!-- MODAL: Backup -->
+<div class="mo" id="m-backup" style="display:none" onclick="if(event.target===this)closeM('m-backup')">
+  <div class="md"><div class="mh2"></div><div class="mh"><span class="mt">Backup &amp; Restore</span><button class="mc" onclick="closeM('m-backup')">x</button></div>
+    <div class="mts"><button class="mta on" id="bt-s" onclick="switchBT('save')">Save Backup</button><button class="mta" id="bt-l" onclick="switchBT('load')">Load Backup</button></div>
+    <div class="mb">
       <div id="b-save">
-        <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px">Tap below to open Mail with your backup ready. Send it to yourself — it lives in your inbox. To restore, paste the email text into Load Backup.</p>
-        <a class="btn-link btn-link-orange" id="b-email-full" href="#">Email Backup to Myself</a>
-        <a class="btn-link btn-link-ghost" id="b-email-nophoto" href="#" style="display:none;margin-top:10px">Email Without Photos (smaller)</a>
-        <div class="hint">Photos make backups large. Use "without photos" if the email fails to send.</div>
+        <p style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:16px">Tap below to open Mail with the backup ready. Send it to yourself. To restore later, paste the email text into Load Backup.</p>
+        <a class="bl blo" id="b-full" href="#">Email Backup to Myself</a>
+        <a class="bl blg" id="b-nophoto" href="#" style="display:none">Email Without Photos (smaller)</a>
+        <div class="hint">Photos make backups large. Use without photos if the email fails to send.</div>
       </div>
       <div id="b-load" style="display:none">
-        <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px">Open your backup email, copy all the text, paste it below, then tap Restore.</p>
-        <textarea class="form-input" id="b-paste" rows="7" placeholder="Paste backup text here..."></textarea>
-        <div class="error-msg" id="b-error" style="display:none"></div>
-        <div class="flex-row" style="margin-top:14px">
-          <button class="btn btn-orange" onclick="doRestore()">Restore Data</button>
-          <button class="btn btn-ghost" onclick="closeModal('m-backup')">Cancel</button>
-        </div>
+        <p style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:12px">Open your backup email, copy all the text, paste it below, then tap Restore.</p>
+        <textarea class="fi" id="b-paste" rows="7" placeholder="Paste backup text here..."></textarea>
+        <div class="err" id="b-err" style="display:none"></div>
+        <div class="frow" style="margin-top:14px"><button class="btn bo" onclick="doRestore()">Restore Data</button><button class="btn bg" onclick="closeM('m-backup')">Cancel</button></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-var SK = 'siteboss-v3';
-var db = { jobs:[], notes:[] };
+var SK = 'siteboss-v4';
+var db = { jobs: [], notes: [] };
 var curJobId = null;
-var jobFilter = 'all';
-var punchFilter = 'open';
-var detailTab = 'punch';
-var editPunchId = null;
-var editReportId = null;
-var reportDate = null;
-var reportFromToday = false;
+var jFilter = 'all';
+var pFilter = 'open';
+var dTab = 'punch';
+var editPId = null;
+var editRId = null;
+var rDate = null;
+var fromToday = false;
 var rPhotos = [];
 var rTrades = [];
 
-var TRADES = ["General Contractor","Electrician","Plumber","HVAC","Carpenter","Framer","Roofer","Mason","Drywaller","Painter","Flooring","Concrete","Steel/Iron","Landscaping","Excavation","Insulation","Tile","Glazier","Fire Protection","Low Voltage","Other"];
+var TRADES = ['General Contractor','Electrician','Plumber','HVAC','Carpenter','Framer','Roofer','Mason','Drywaller','Painter','Flooring','Concrete','Steel/Iron','Landscaping','Excavation','Insulation','Tile','Glazier','Fire Protection','Low Voltage','Other'];
 
-var CHECKLIST = [
-  { phase:"Phase 1 — Pre-Construction", icon:"📐", items:["Project scope finalized and signed","Permits applied for","Permits approved and posted on site","All subcontractors contracted","Subcontractor schedule confirmed","Materials ordered and delivery dates confirmed","Site protection set up (floors, walls)","Utility locates called (811)","Temporary power / facilities arranged","Pre-construction photos taken"] },
-  { phase:"Phase 2 — Demo", icon:"🔨", items:["Utilities capped / disconnected","Hazmat inspection done (asbestos / lead)","Hazmat abatement complete (if needed)","Interior demo complete","Debris hauled and disposed","Structural assessment complete","Demo photos taken"] },
-  { phase:"Phase 3 — Rough Framing", icon:"🪵", items:["Structural repairs complete","New framing complete","Window and door openings framed","Shear wall / blocking installed","Roof structure inspected / repaired","Framing inspection passed","Framing inspection card signed"] },
-  { phase:"Phase 4 — Rough MEP", icon:"⚡", items:["Rough plumbing complete","Rough electrical complete","Panel upgraded / updated (if needed)","HVAC ducts and equipment rough-in complete","Gas lines rough-in complete","Fire sprinkler rough-in (if needed)","Low voltage rough-in complete","Rough plumbing inspection passed","Rough electrical inspection passed","Rough mechanical inspection passed","All rough MEP inspections signed off"] },
-  { phase:"Phase 5 — Insulation", icon:"🏠", items:["Wall insulation installed","Ceiling / attic insulation installed","Crawl space / floor insulation (if needed)","Sound insulation installed (if needed)","Insulation inspection passed"] },
-  { phase:"Phase 6 — Drywall", icon:"🪣", items:["Drywall hung","Drywall taped and first coat mudded","Second coat complete","Final coat and skim complete","Texture applied (if needed)","Drywall inspection passed","Corner bead and arch bead installed"] },
-  { phase:"Phase 7 — Exterior", icon:"🏗️", items:["Roofing complete","Gutters and downspouts installed","Windows installed","Exterior doors installed","House wrap / moisture barrier installed","Siding installed","Waterproofing / caulking complete","Exterior paint complete","Flatwork / concrete complete (if needed)"] },
-  { phase:"Phase 8 — Interior Finishes", icon:"🎨", items:["Hardwood / LVP flooring installed","Tile flooring installed","Carpet installed","Kitchen cabinets installed","Bathroom vanities installed","Countertops templated","Countertops installed","Kitchen backsplash tile installed","Bathroom tile complete","Shower / tub surround complete","Interior doors hung","Door hardware installed","Baseboard and casing installed","Crown molding installed (if needed)","Closet systems installed","Interior paint — walls complete","Interior paint — trim complete","Interior paint — ceilings complete"] },
-  { phase:"Phase 9 — Finish MEP", icon:"🔌", items:["Plumbing fixtures installed (sinks, toilets, tubs, showers)","Plumbing trim complete (faucets, valves, supply lines)","Water heater connected and operational","Electrical devices installed (outlets, switches)","Light fixtures installed","Ceiling fans installed","Panel finalized and labeled","HVAC registers and grilles installed","Thermostats installed and programmed","Range hood installed","Appliances installed and connected","Fire alarm devices installed","Low voltage devices installed (data, TV, security)"] },
-  { phase:"Phase 10 — Final", icon:"✅", items:["Final cleaning complete","Touch-up paint complete","Punch list items complete","Final plumbing inspection passed","Final electrical inspection passed","Final mechanical inspection passed","Final building inspection passed","Certificate of Occupancy received","Owner walkthrough complete","Owner sign-off obtained","Warranty documents provided to owner","Keys and access codes handed over","Final project photos taken","Project closeout paperwork complete","Lien releases collected from all subs"] }
+var CL = [
+  {ph:'Pre-Construction',n:'1',items:['Project scope finalized and signed','Permits applied for','Permits approved and posted on site','All subcontractors contracted','Subcontractor schedule confirmed','Materials ordered and delivery dates confirmed','Site protection set up (floors, walls)','Utility locates called (811)','Temporary power / facilities arranged','Pre-construction photos taken']},
+  {ph:'Demo',n:'2',items:['Utilities capped / disconnected','Hazmat inspection done (asbestos / lead)','Hazmat abatement complete (if needed)','Interior demo complete','Debris hauled and disposed','Structural assessment complete','Demo photos taken']},
+  {ph:'Rough Framing',n:'3',items:['Structural repairs complete','New framing complete','Window and door openings framed','Shear wall / blocking installed','Roof structure inspected / repaired','Framing inspection passed','Framing inspection card signed']},
+  {ph:'Rough MEP',n:'4',items:['Rough plumbing complete','Rough electrical complete','Panel upgraded / updated (if needed)','HVAC ducts and equipment rough-in complete','Gas lines rough-in complete','Fire sprinkler rough-in (if needed)','Low voltage rough-in complete','Rough plumbing inspection passed','Rough electrical inspection passed','Rough mechanical inspection passed','All rough MEP inspections signed off']},
+  {ph:'Insulation',n:'5',items:['Wall insulation installed','Ceiling / attic insulation installed','Crawl space / floor insulation (if needed)','Sound insulation installed (if needed)','Insulation inspection passed']},
+  {ph:'Drywall',n:'6',items:['Drywall hung','Drywall taped and first coat mudded','Second coat complete','Final coat and skim complete','Texture applied (if needed)','Drywall inspection passed','Corner bead and arch bead installed']},
+  {ph:'Exterior',n:'7',items:['Roofing complete','Gutters and downspouts installed','Windows installed','Exterior doors installed','House wrap / moisture barrier installed','Siding installed','Waterproofing / caulking complete','Exterior paint complete','Flatwork / concrete complete (if needed)']},
+  {ph:'Interior Finishes',n:'8',items:['Hardwood / LVP flooring installed','Tile flooring installed','Carpet installed','Kitchen cabinets installed','Bathroom vanities installed','Countertops templated','Countertops installed','Kitchen backsplash tile installed','Bathroom tile complete','Shower / tub surround complete','Interior doors hung','Door hardware installed','Baseboard and casing installed','Crown molding installed (if needed)','Closet systems installed','Interior paint - walls complete','Interior paint - trim complete','Interior paint - ceilings complete']},
+  {ph:'Finish MEP',n:'9',items:['Plumbing fixtures installed (sinks, toilets, tubs, showers)','Plumbing trim complete (faucets, valves, supply lines)','Water heater connected and operational','Electrical devices installed (outlets, switches)','Light fixtures installed','Ceiling fans installed','Panel finalized and labeled','HVAC registers and grilles installed','Thermostats installed and programmed','Range hood installed','Appliances installed and connected','Fire alarm devices installed','Low voltage devices installed (data, TV, security)']},
+  {ph:'Final Closeout',n:'10',items:['Final cleaning complete','Touch-up paint complete','Punch list items complete','Final plumbing inspection passed','Final electrical inspection passed','Final mechanical inspection passed','Final building inspection passed','Certificate of Occupancy received','Owner walkthrough complete','Owner sign-off obtained','Warranty documents provided to owner','Keys and access codes handed over','Final project photos taken','Project closeout paperwork complete','Lien releases collected from all subs']}
 ];
 
 function saveDB() { try { localStorage.setItem(SK, JSON.stringify(db)); } catch(e) {} }
 function loadDB() {
-  try { var r = localStorage.getItem(SK); if(r) { var p = JSON.parse(r); db.jobs = p.jobs||[]; db.notes = p.notes||[]; } } catch(e) {}
+  try {
+    var r = localStorage.getItem(SK);
+    if (r) { var p = JSON.parse(r); db.jobs = p.jobs || []; db.notes = p.notes || []; }
+  } catch(e) {}
 }
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
-function todayStr() { return new Date().toISOString().slice(0,10); }
-function fmtDate(iso) {
-  if(!iso) return '';
-  var p = iso.split('-'); var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function today() { return new Date().toISOString().slice(0, 10); }
+function fmtD(iso) {
+  if (!iso) return '';
+  var p = iso.split('-');
+  var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return mo[+p[1]-1] + ' ' + (+p[2]) + ', ' + p[0];
 }
-function fmtDateLong(iso) {
-  if(!iso) return '';
+function fmtDL(iso) {
+  if (!iso) return '';
+  var p = iso.split('-');
   var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var p = iso.split('-'); var dt = new Date(iso + 'T12:00:00');
-  return days[dt.getDay()] + ', ' + months[+p[1]-1] + ' ' + (+p[2]) + ', ' + p[0];
+  var mos = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dt = new Date(iso + 'T12:00:00');
+  return days[dt.getDay()] + ', ' + mos[+p[1]-1] + ' ' + (+p[2]) + ', ' + p[0];
 }
-function esc(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function greeting() { var h = new Date().getHours(); return h<12?'Good morning':h<17?'Good afternoon':'Good evening'; }
+function esc(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function greet() { var h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
 
 function toast(msg, icon) {
-  icon = icon||'✓';
-  document.getElementById('ti').textContent = icon;
-  document.getElementById('tm').textContent = msg;
   var t = document.getElementById('toast');
-  t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); }, 2400);
+  document.getElementById('ti').textContent = icon || 'v';
+  document.getElementById('tm').textContent = msg;
+  t.classList.add('on');
+  setTimeout(function() { t.classList.remove('on'); }, 2400);
 }
 
 function goTo(screen) {
-  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
-  var s = document.getElementById('screen-' + screen);
-  var n = document.getElementById('nav-' + screen);
-  if(s) s.classList.add('active');
-  if(n) n.classList.add('active');
-  window.scrollTo(0,0);
-  if(screen==='today') renderToday();
-  if(screen==='jobs') renderJobs();
-  if(screen==='checklist') { fillChecklistSelect(); loadChecklist(); }
-  if(screen==='notes') renderNotes();
+  document.querySelectorAll('.sc').forEach(function(s) { s.classList.remove('on'); });
+  document.querySelectorAll('.nb').forEach(function(b) { b.classList.remove('on'); });
+  var s = document.getElementById('sc-' + screen);
+  var n = document.getElementById('nb-' + screen);
+  if (s) s.classList.add('on');
+  if (n) n.classList.add('on');
+  window.scrollTo(0, 0);
+  if (screen === 'today') renderToday();
+  if (screen === 'jobs') renderJobs();
+  if (screen === 'checklist') { fillCLSelect(); loadCL(); }
+  if (screen === 'notes') renderNotes();
 }
 
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeM(id) { document.getElementById(id).style.display = 'none'; }
+function openM(id) { document.getElementById(id).style.display = 'flex'; }
 
 function ring(pct, color, size) {
-  color = color||'var(--orange)'; size = size||44;
-  var r = size/2 - 4;
+  color = color || 'var(--or)'; size = size || 44;
+  var r = size / 2 - 4;
   var circ = 2 * Math.PI * r;
-  var off = circ - (pct/100)*circ;
-  return '<div class="progress-ring-wrap" style="width:'+size+'px;height:'+size+'px">' +
-    '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">' +
-    '<circle fill="none" stroke="var(--border2)" stroke-width="3" cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" />' +
-    '<circle fill="none" stroke="'+color+'" stroke-width="3" stroke-linecap="round" cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'" transform="rotate(-90 '+(size/2)+' '+(size/2)+')" />' +
-    '</svg>' +
-    '<div class="progress-ring-text" style="color:'+color+'">'+pct+'%</div></div>';
+  var off = circ - (pct / 100) * circ;
+  return '<div class="rw" style="width:' + size + 'px;height:' + size + 'px">' +
+    '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' +
+    '<circle fill="none" stroke="var(--bd2)" stroke-width="3" cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '"/>' +
+    '<circle fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" stroke-dasharray="' + circ + '" stroke-dashoffset="' + off + '" transform="rotate(-90 ' + (size/2) + ' ' + (size/2) + ')"/>' +
+    '</svg><div class="rt" style="color:' + color + '">' + pct + '%</div></div>';
 }
 
 // TODAY
 function renderToday() {
   var now = new Date();
   var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var dateStr = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
-  var td = todayStr();
-  var activeJobs = db.jobs.filter(function(j){ return j.status==='active'; });
-  var openPunch = db.jobs.reduce(function(n,j){ return n + (j.punch||[]).filter(function(p){ return !p.done; }).length; }, 0);
-  var highPunch = db.jobs.reduce(function(n,j){ return n + (j.punch||[]).filter(function(p){ return !p.done && p.priority==='high'; }).length; }, 0);
-  var notLogged = activeJobs.filter(function(j){ return !(j.reports||[]).find(function(r){ return r.date===td; }); }).length;
+  var mos = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var ds = days[now.getDay()] + ', ' + mos[now.getMonth()] + ' ' + now.getDate();
+  var td = today();
+  var aj = db.jobs.filter(function(j) { return j.status === 'active'; });
+  var op = db.jobs.reduce(function(n, j) { return n + (j.punch || []).filter(function(p) { return !p.done; }).length; }, 0);
+  var hi = db.jobs.reduce(function(n, j) { return n + (j.punch || []).filter(function(p) { return !p.done && p.priority === 'high'; }).length; }, 0);
+  var nl = aj.filter(function(j) { return !(j.reports || []).find(function(r) { return r.date === td; }); }).length;
 
-  var html = '<div class="today-hero">' +
-    '<div class="today-greeting">' + greeting() + ', Supervisor 👋</div>' +
-    '<div class="today-date-big">' + dateStr + '</div>' +
-    '<div class="today-stats">' +
-    '<div><div class="ts-val">' + activeJobs.length + '</div><div class="ts-lbl">Active Jobs</div></div>' +
-    '<div><div class="ts-val" style="color:' + (highPunch>0?'var(--red)':'var(--green)') + '">' + openPunch + '</div><div class="ts-lbl">Open Items</div></div>' +
-    '<div><div class="ts-val" style="color:' + (notLogged>0?'var(--amber)':'var(--green)') + '">' + notLogged + '</div><div class="ts-lbl">Need Log</div></div>' +
+  var h = '<div class="th">' +
+    '<div class="tg3">' + greet() + ', Supervisor</div>' +
+    '<div class="td">' + ds + '</div>' +
+    '<div class="ts">' +
+    '<div><div class="tv">' + aj.length + '</div><div class="tl">Active Jobs</div></div>' +
+    '<div><div class="tv" style="color:' + (hi > 0 ? 'var(--rd)' : 'var(--gr)') + '">' + op + '</div><div class="tl">Open Items</div></div>' +
+    '<div><div class="tv" style="color:' + (nl > 0 ? 'var(--am)' : 'var(--gr)') + '">' + nl + '</div><div class="tl">Need Log</div></div>' +
     '</div></div>';
 
-  // Urgent items
   var urgent = [];
-  db.jobs.forEach(function(j){ (j.punch||[]).forEach(function(p){ if(!p.done && p.priority==='high') urgent.push({p:p, jobName:j.name, jobId:j.id}); }); });
-  if(urgent.length > 0) {
-    html += '<div class="section"><div class="section-head" style="color:var(--red)">Urgent Items <span class="tag tag-r">' + urgent.length + '</span></div>';
-    urgent.slice(0,4).forEach(function(u){
-      html += '<div class="punch-item ph" onclick="openDetail(\'' + u.jobId + '\',\'punch\')" style="cursor:pointer">' +
-        '<div style="width:8px;height:8px;background:var(--red);border-radius:50%;flex-shrink:0;margin-top:6px;box-shadow:0 0 8px var(--red)"></div>' +
-        '<div style="flex:1"><div class="punch-title">' + esc(u.p.title) + '</div>' +
-        '<div class="punch-meta"><span class="tag tag-o" style="font-size:9px">' + esc(u.jobName) + '</span>' + (u.p.due ? '<span>Due ' + fmtDate(u.p.due) + '</span>' : '') + '</div></div></div>';
+  db.jobs.forEach(function(j) {
+    (j.punch || []).forEach(function(p) {
+      if (!p.done && p.priority === 'high') urgent.push({p: p, jn: j.name, jid: j.id});
     });
-    html += '</div>';
+  });
+  if (urgent.length > 0) {
+    h += '<div class="sec"><div class="sh" style="color:var(--rd)">Urgent Items <span class="tg" style="background:var(--rdd);color:var(--rd);border:1px solid var(--rb)">' + urgent.length + '</span></div>';
+    urgent.slice(0, 4).forEach(function(u) {
+      h += '<div class="pi ph" onclick="openDetail(\'' + u.jid + '\',\'punch\')" style="cursor:pointer">' +
+        '<div style="width:8px;height:8px;background:var(--rd);border-radius:50%;flex-shrink:0;margin-top:6px"></div>' +
+        '<div style="flex:1"><div class="pt">' + esc(u.p.title) + '</div>' +
+        '<div class="pm2"><span class="tg to" style="font-size:9px">' + esc(u.jn) + '</span>' + (u.p.due ? '<span>Due ' + fmtD(u.p.due) + '</span>' : '') + '</div></div></div>';
+    });
+    h += '</div>';
   }
 
-  // Active jobs with Log Today button
-  if(activeJobs.length > 0) {
-    html += '<div class="section"><div class="section-head">Active Jobs</div>';
-    activeJobs.forEach(function(job){
-      var punch = job.punch||[];
+  if (aj.length > 0) {
+    h += '<div class="sec"><div class="sh">Active Jobs</div>';
+    aj.forEach(function(job) {
+      var punch = job.punch || [];
       var total = punch.length;
-      var done = punch.filter(function(p){ return p.done; }).length;
-      var pct = total>0 ? Math.round((done/total)*100) : 0;
-      var logged = (job.reports||[]).find(function(r){ return r.date===td; });
-      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 15px;margin-bottom:10px;border-left:3px solid var(--orange)">' +
+      var done = punch.filter(function(p) { return p.done; }).length;
+      var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      var logged = (job.reports || []).find(function(r) { return r.date === td; });
+      h += '<div style="background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px 15px;margin-bottom:10px;border-left:3px solid var(--or)">' +
         '<div style="display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:12px" onclick="openDetail(\'' + job.id + '\',\'punch\')">' +
         ring(pct) +
         '<div style="flex:1;min-width:0">' +
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
-        '<span class="job-name">' + esc(job.name) + '</span>' +
-        (logged ? '<span class="tag tag-g">✓ Logged</span>' : '') +
+        '<span class="jn">' + esc(job.name) + '</span>' +
+        (logged ? '<span class="tg tg2">Logged</span>' : '') +
         '</div>' +
-        '<div class="job-meta">' + (job.client?'<span>'+esc(job.client)+'</span>':'') + '<span>' + done + '/' + total + ' punch done</span></div>' +
-        '</div><span style="color:var(--muted);font-size:20px">›</span></div>' +
-        '<div style="padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
+        '<div class="jm">' + (job.client ? '<span>' + esc(job.client) + '</span>' : '') + '<span>' + done + '/' + total + ' punch done</span></div>' +
+        '</div><span style="color:var(--mu);font-size:20px">&#x203A;</span></div>' +
+        '<div style="padding-top:12px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between">' +
         (logged ?
-          '<div style="font-family:var(--mono);font-size:10px;color:var(--green)">✅ Logged today</div><button onclick="quickLog(\'' + job.id + '\')" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;color:var(--text2);font-family:var(--mono);font-size:11px;padding:7px 14px;cursor:pointer">+ Add Another</button>'
+          '<div style="font-family:var(--mono);font-size:10px;color:var(--gr)">Logged today</div><button onclick="quickLog(\'' + job.id + '\')" style="background:var(--sf2);border:1px solid var(--bd2);border-radius:7px;color:var(--tx2);font-family:var(--mono);font-size:11px;padding:7px 14px;cursor:pointer">+ Add More</button>'
           :
-          '<div style="font-family:var(--mono);font-size:10px;color:var(--amber)">⚠️ No log entry yet today</div><button onclick="quickLog(\'' + job.id + '\')" style="background:var(--orange);border:none;border-radius:7px;color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 16px;cursor:pointer">+ Log Today</button>'
+          '<div style="font-family:var(--mono);font-size:10px;color:var(--am)">No log entry yet today</div><button onclick="quickLog(\'' + job.id + '\')" style="background:var(--or);border:none;border-radius:7px;color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 16px;cursor:pointer">+ Log Today</button>'
         ) +
         '</div></div>';
     });
-    html += '</div>';
+    h += '</div>';
   } else {
-    html += '<div class="empty"><span class="empty-icon">🏗️</span><div class="empty-title">No active jobs</div>Tap Jobs to create one.</div>';
+    h += '<div class="em"><span class="ei">🏗️</span><div class="et">No active jobs</div>Tap Jobs to create one.</div>';
   }
 
-  // Notes
-  if(db.notes.length > 0) {
-    html += '<div class="section"><div class="section-head">Recent Notes <span onclick="goTo(\'notes\')" style="color:var(--orange);cursor:pointer;font-size:10px;font-family:var(--mono)">See all</span></div>';
-    db.notes.slice(0,2).forEach(function(n){
-      html += '<div class="note-card"><div class="note-text">' + esc(n.text.length>100?n.text.slice(0,100)+'...':n.text) + '</div>' +
-        '<div class="note-meta">' + (n.tag?'<span class="tag tag-o">'+esc(n.tag)+'</span>':'') + '<span>' + fmtDate(n.created) + '</span></div></div>';
+  if (db.notes.length > 0) {
+    h += '<div class="sec"><div class="sh">Recent Notes <span onclick="goTo(\'notes\')" style="color:var(--or);cursor:pointer;font-size:10px;font-family:var(--mono)">See all</span></div>';
+    db.notes.slice(0, 2).forEach(function(n) {
+      h += '<div class="nc"><div class="nt">' + esc(n.text.length > 100 ? n.text.slice(0, 100) + '...' : n.text) + '</div>' +
+        '<div class="nm">' + (n.tag ? '<span class="tg to">' + esc(n.tag) + '</span>' : '') + '<span>' + fmtD(n.created) + '</span></div></div>';
     });
-    html += '</div>';
+    h += '</div>';
   }
-  html += '<div style="height:12px"></div>';
-  document.getElementById('todayContent').innerHTML = html;
+  h += '<div style="height:12px"></div>';
+  document.getElementById('today-content').innerHTML = h;
 }
 
 function quickLog(jobId) {
   curJobId = jobId;
-  var job = db.jobs.find(function(j){ return j.id===jobId; });
-  if(!job) return;
-  reportFromToday = true;
-  openAddReport(todayStr());
+  fromToday = true;
+  openReport(today());
 }
 
 // JOBS
 function renderJobs() {
-  var counts = {all:db.jobs.length, active:0, onhold:0, complete:0};
-  db.jobs.forEach(function(j){ if(counts[j.status]!==undefined) counts[j.status]++; });
-  ['all','active','onhold','complete'].forEach(function(f){ var el=document.getElementById('jc-'+f); if(el) el.textContent=counts[f]; });
-  var filtered = jobFilter==='all' ? db.jobs : db.jobs.filter(function(j){ return j.status===jobFilter; });
-  var list = document.getElementById('jobsList');
-  if(!filtered.length) { list.innerHTML='<div class="empty"><span class="empty-icon">🏗️</span><div class="empty-title">'+(jobFilter==='all'?'No jobs yet':'No '+jobFilter+' jobs')+'</div>'+(jobFilter==='all'?'Tap + New Job to get started.':'')+'</div>'; return; }
-  var sc = {active:'s-active',complete:'s-complete',onhold:'s-onhold'};
-  var colors = {active:'var(--orange)',complete:'var(--green)',onhold:'var(--amber)'};
-  var labels = {active:'Active',complete:'Complete',onhold:'On Hold'};
-  list.innerHTML = filtered.map(function(job){
-    var punch = job.punch||[]; var done = punch.filter(function(p){return p.done;}).length; var total = punch.length;
-    var pct = total>0?Math.round((done/total)*100):0;
-    var rc = (job.reports||[]).length; var c = colors[job.status]||'var(--orange)';
-    return '<div class="job-card '+(sc[job.status]||'')+'" onclick="openDetail(\''+job.id+'\',\'punch\')">' +
-      ring(pct,c) +
+  var counts = { all: db.jobs.length, active: 0, onhold: 0, complete: 0 };
+  db.jobs.forEach(function(j) { if (counts[j.status] !== undefined) counts[j.status]++; });
+  ['all','active','onhold','complete'].forEach(function(f) {
+    var el = document.getElementById('jc-' + f);
+    if (el) el.textContent = counts[f];
+  });
+  var filtered = jFilter === 'all' ? db.jobs : db.jobs.filter(function(j) { return j.status === jFilter; });
+  var list = document.getElementById('jobs-list');
+  if (!filtered.length) {
+    list.innerHTML = '<div class="em"><span class="ei">🏗️</span><div class="et">' + (jFilter === 'all' ? 'No jobs yet' : 'No ' + jFilter + ' jobs') + '</div>' + (jFilter === 'all' ? 'Tap + New Job to get started.' : '') + '</div>';
+    return;
+  }
+  var sc = { active: 'sa', complete: 'sc2', onhold: 'sh2' };
+  var colors = { active: 'var(--or)', complete: 'var(--gr)', onhold: 'var(--am)' };
+  var labels = { active: 'Active', complete: 'Complete', onhold: 'On Hold' };
+  list.innerHTML = filtered.map(function(job) {
+    var punch = job.punch || [];
+    var done = punch.filter(function(p) { return p.done; }).length;
+    var total = punch.length;
+    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    var rc = (job.reports || []).length;
+    var c = colors[job.status] || 'var(--or)';
+    return '<div class="jc ' + (sc[job.status] || '') + '" onclick="openDetail(\'' + job.id + '\',\'punch\')">' +
+      ring(pct, c) +
       '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
-      '<span class="job-name">'+esc(job.name)+'</span>' +
-      '<span class="tag" style="background:'+c+'18;color:'+c+';border:1px solid '+c+'40;font-size:9px;padding:2px 8px;border-radius:20px;font-weight:700">'+( labels[job.status]||job.status)+'</span>' +
-      '</div><div class="job-meta">' +
-      (job.number?'<span style="color:var(--orange);font-weight:600">'+esc(job.number)+'</span>':'') +
-      (job.client?'<span>'+esc(job.client)+'</span>':'') +
-      (job.location?'<span>'+esc(job.location)+'</span>':'') +
-      '<span>'+done+'/'+total+' punch · '+rc+' log'+(rc!==1?'s':'')+'</span></div></div>' +
-      '<span style="color:var(--muted);font-size:20px">›</span></div>';
+      '<span class="jn">' + esc(job.name) + '</span>' +
+      '<span class="tg" style="background:' + c + '18;color:' + c + ';border:1px solid ' + c + '40;font-size:9px;padding:2px 8px;border-radius:20px;font-weight:700">' + (labels[job.status] || job.status) + '</span>' +
+      '</div><div class="jm">' +
+      (job.number ? '<span style="color:var(--or);font-weight:600">' + esc(job.number) + '</span>' : '') +
+      (job.client ? '<span>' + esc(job.client) + '</span>' : '') +
+      (job.location ? '<span>' + esc(job.location) + '</span>' : '') +
+      '<span>' + done + '/' + total + ' punch | ' + rc + ' log' + (rc !== 1 ? 's' : '') + '</span>' +
+      '</div></div><span style="color:var(--mu);font-size:20px">&#x203A;</span></div>';
   }).join('');
 }
 
-function setJobFilter(btn) {
-  document.querySelectorAll('#screen-jobs .fpill').forEach(function(t){t.classList.remove('active');});
-  btn.classList.add('active'); jobFilter = btn.dataset.f; renderJobs();
+function setJF(btn) {
+  document.querySelectorAll('#sc-jobs .fp').forEach(function(t) { t.classList.remove('on'); });
+  btn.classList.add('on'); jFilter = btn.dataset.f; renderJobs();
 }
-function showAddJob() { document.getElementById('addJobForm').style.display='block'; document.getElementById('nj-name').focus(); }
+function showAddJob() { document.getElementById('add-job-form').style.display = 'block'; document.getElementById('nj-n').focus(); }
 function hideAddJob() {
-  document.getElementById('addJobForm').style.display='none';
-  ['nj-name','nj-client','nj-addr','nj-num'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('nj-status').value='active';
+  document.getElementById('add-job-form').style.display = 'none';
+  ['nj-n','nj-c','nj-a','nj-num'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('nj-s').value = 'active';
 }
 function createJob() {
-  var name = document.getElementById('nj-name').value.trim();
-  if(!name){toast('Job name is required','⚠️');return;}
-  var job = {id:uid(),name:name,client:document.getElementById('nj-client').value.trim(),location:document.getElementById('nj-addr').value.trim(),number:document.getElementById('nj-num').value.trim(),status:document.getElementById('nj-status').value,punch:[],reports:[],created:todayStr()};
-  db.jobs.unshift(job); saveDB(); hideAddJob(); renderJobs();
-  openDetail(job.id,'punch');
-  toast('Job created','🏗️');
+  var name = document.getElementById('nj-n').value.trim();
+  if (!name) { toast('Job name is required'); return; }
+  var job = { id: uid(), name: name, client: document.getElementById('nj-c').value.trim(), location: document.getElementById('nj-a').value.trim(), number: document.getElementById('nj-num').value.trim(), status: document.getElementById('nj-s').value, punch: [], reports: [], created: today() };
+  db.jobs.unshift(job); saveDB(); hideAddJob(); renderJobs(); openDetail(job.id, 'punch');
+  toast('Job created');
 }
 
-// DETAIL
 function openDetail(id, tab) {
-  curJobId = id; detailTab = tab||'punch'; punchFilter = 'open';
-  var job = db.jobs.find(function(j){return j.id===id;});
-  if(!job) return;
-  document.getElementById('d-jobname').textContent = job.name;
-  document.getElementById('d-jobnum').textContent = job.number || (job.client||'');
-  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
-  document.getElementById('screen-detail').classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById('nav-jobs').classList.add('active');
-  window.scrollTo(0,0);
-  switchDTab(tab||'punch');
+  curJobId = id; dTab = tab || 'punch';
+  var job = db.jobs.find(function(j) { return j.id === id; });
+  if (!job) return;
+  document.getElementById('d-name').textContent = job.name;
+  document.getElementById('d-num').textContent = job.number || (job.client || '');
+  document.querySelectorAll('.sc').forEach(function(s) { s.classList.remove('on'); });
+  document.getElementById('sc-detail').classList.add('on');
+  document.querySelectorAll('.nb').forEach(function(b) { b.classList.remove('on'); });
+  document.getElementById('nb-jobs').classList.add('on');
+  window.scrollTo(0, 0); pFilter = 'open';
+  switchTab(tab || 'punch');
 }
-function curJob() { return db.jobs.find(function(j){return j.id===curJobId;}); }
+function cJob() { return db.jobs.find(function(j) { return j.id === curJobId; }); }
 
-function switchDTab(tab) {
-  detailTab = tab;
-  document.getElementById('d-punch').style.display = tab==='punch'?'block':'none';
-  document.getElementById('d-log').style.display = tab==='log'?'block':'none';
-  document.getElementById('dtab-punch').classList.toggle('active', tab==='punch');
-  document.getElementById('dtab-log').classList.toggle('active', tab==='log');
-  if(tab==='punch') renderPunch();
-  if(tab==='log') renderLog();
+function switchTab(tab) {
+  dTab = tab;
+  document.getElementById('d-punch').style.display = tab === 'punch' ? 'block' : 'none';
+  document.getElementById('d-log').style.display = tab === 'log' ? 'block' : 'none';
+  document.getElementById('dt-punch').classList.toggle('on', tab === 'punch');
+  document.getElementById('dt-log').classList.toggle('on', tab === 'log');
+  if (tab === 'punch') renderPunch();
+  if (tab === 'log') renderLog();
 }
 
 // PUNCH
 function showAddPunch() {
-  editPunchId = null;
-  document.getElementById('pm-title').textContent = 'Add Item';
-  ['pm-title-in','pm-assign','pm-notes'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('pm-pri').value='med';
-  document.getElementById('pm-due').value='';
-  openModal('m-punch');
+  editPId = null;
+  document.getElementById('pm-t').textContent = 'Add Item';
+  ['pm-ti','pm-a','pm-n'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('pm-p').value = 'med';
+  document.getElementById('pm-d').value = '';
+  openM('m-punch');
 }
-function setPunchFilter(btn) {
-  document.querySelectorAll('[data-pf]').forEach(function(t){t.classList.remove('active');});
-  btn.classList.add('active'); punchFilter=btn.dataset.pf; renderPunch();
+function setPF(btn) {
+  document.querySelectorAll('[data-pf]').forEach(function(t) { t.classList.remove('on'); });
+  btn.classList.add('on'); pFilter = btn.dataset.pf; renderPunch();
 }
 function renderPunch() {
-  var job = curJob(); if(!job) return;
-  var punch = job.punch||[];
-  var open = punch.filter(function(p){return!p.done;}).length;
-  var done = punch.filter(function(p){return p.done;}).length;
-  var high = punch.filter(function(p){return!p.done&&p.priority==='high';}).length;
-  var pct = punch.length>0?Math.round((done/punch.length)*100):0;
+  var job = cJob(); if (!job) return;
+  var punch = job.punch || [];
+  var open = punch.filter(function(p) { return !p.done; }).length;
+  var done = punch.filter(function(p) { return p.done; }).length;
+  var high = punch.filter(function(p) { return !p.done && p.priority === 'high'; }).length;
+  var pct = punch.length > 0 ? Math.round((done / punch.length) * 100) : 0;
   document.getElementById('d-punch-stats').innerHTML =
-    ring(pct, pct===100?'var(--green)':'var(--orange)', 54) +
-    '<div class="stat-card"><div class="stat-val">'+open+'</div><div class="stat-label">Open</div></div>' +
-    '<div class="stat-card" style="border-color:var(--red-b)"><div class="stat-val" style="color:var(--red)">'+high+'</div><div class="stat-label">Urgent</div></div>' +
-    '<div class="stat-card" style="border-color:var(--green-b)"><div class="stat-val" style="color:var(--green)">'+done+'</div><div class="stat-label">Done</div></div>';
+    ring(pct, pct === 100 ? 'var(--gr)' : 'var(--or)', 54) +
+    '<div class="sk"><div class="sv">' + open + '</div><div class="sl">Open</div></div>' +
+    '<div class="sk" style="border-color:var(--rb)"><div class="sv" style="color:var(--rd)">' + high + '</div><div class="sl">Urgent</div></div>' +
+    '<div class="sk" style="border-color:var(--gb)"><div class="sv" style="color:var(--gr)">' + done + '</div><div class="sl">Done</div></div>';
   var filtered = punch;
-  if(punchFilter==='open') filtered = punch.filter(function(p){return!p.done;});
-  if(punchFilter==='done') filtered = punch.filter(function(p){return p.done;});
-  var order = {high:0,med:1,low:2};
-  filtered = filtered.slice().sort(function(a,b){return (order[a.priority]||1)-(order[b.priority]||1);});
-  var list = document.getElementById('punchList');
-  if(!filtered.length){list.innerHTML='<div class="empty"><span class="empty-icon">'+(punchFilter==='open'?'✅':'🔨')+'</span><div class="empty-title">'+(punchFilter==='open'?'All clear!':'No items yet')+'</div>'+(punchFilter==='open'?'No open items.':'Add your first item above.')+'</div>';return;}
-  list.innerHTML = filtered.map(function(p){
-    var pc = {high:'h',med:'m',low:'l'}[p.priority]||'m';
-    var pl = {high:'🔴 Urgent',med:'🟡 Medium',low:'🟢 Low'}[p.priority]||'🟡 Medium';
-    return '<div class="punch-item p'+pc+(p.done?' done':'')+'">' +
-      '<button class="punch-check'+(p.done?' checked':'')+'" onclick="togglePunch(\''+p.id+'\')">'+( p.done?'✓':'')+'</button>' +
-      '<div style="flex:1"><div class="punch-title'+(p.done?' done':'')+'">'+esc(p.title)+'</div>' +
-      '<div class="punch-meta"><span class="ppill '+pc+'">'+pl+'</span>'+(p.assigned?'<span>→ '+esc(p.assigned)+'</span>':'')+(p.due?'<span>📅 '+fmtDate(p.due)+'</span>':'')+'</div>' +
-      (p.notes?'<div style="font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5">'+esc(p.notes)+'</div>':'') +
-      '</div><button onclick="editPunch(\''+p.id+'\')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:6px;flex-shrink:0">⋯</button></div>';
+  if (pFilter === 'open') filtered = punch.filter(function(p) { return !p.done; });
+  if (pFilter === 'done') filtered = punch.filter(function(p) { return p.done; });
+  var order = { high: 0, med: 1, low: 2 };
+  filtered = filtered.slice().sort(function(a, b) { return (order[a.priority] || 1) - (order[b.priority] || 1); });
+  var list = document.getElementById('punch-list');
+  if (!filtered.length) {
+    list.innerHTML = '<div class="em"><span class="ei">' + (pFilter === 'open' ? 'OK' : 'X') + '</span><div class="et">' + (pFilter === 'open' ? 'All clear!' : 'No items yet') + '</div>' + (pFilter === 'open' ? 'No open items.' : 'Add your first item above.') + '</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(p) {
+    var pc = { high: 'h', med: 'm', low: 'l' }[p.priority] || 'm';
+    var pl = { high: 'High', med: 'Medium', low: 'Low' }[p.priority] || 'Medium';
+    return '<div class="pi p' + pc + (p.done ? ' dn' : '') + '">' +
+      '<button class="pc' + (p.done ? ' ck' : '') + '" onclick="togglePunch(\'' + p.id + '\')">' + (p.done ? 'v' : '') + '</button>' +
+      '<div style="flex:1"><div class="pt' + (p.done ? ' dn' : '') + '">' + esc(p.title) + '</div>' +
+      '<div class="pm2"><span class="pp ' + pc + '">' + pl + '</span>' + (p.assigned ? '<span>- ' + esc(p.assigned) + '</span>' : '') + (p.due ? '<span>Due ' + fmtD(p.due) + '</span>' : '') + '</div>' +
+      (p.notes ? '<div style="font-size:12px;color:var(--mu);margin-top:5px;line-height:1.5">' + esc(p.notes) + '</div>' : '') +
+      '</div><button onclick="editPunch(\'' + p.id + '\')" style="background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;padding:6px;flex-shrink:0">...</button></div>';
   }).join('');
 }
 function togglePunch(id) {
-  var job=curJob(); var p=(job.punch||[]).find(function(x){return x.id===id;});
-  if(p){p.done=!p.done;p.doneAt=p.done?new Date().toISOString():null;}
+  var job = cJob(); var p = (job.punch || []).find(function(x) { return x.id === id; });
+  if (p) { p.done = !p.done; p.doneAt = p.done ? new Date().toISOString() : null; }
   saveDB(); renderPunch();
-  if(p&&p.done) toast('Item complete','✅');
+  if (p && p.done) toast('Item complete');
 }
 function editPunch(id) {
-  var job=curJob(); var p=(job.punch||[]).find(function(x){return x.id===id;}); if(!p) return;
-  editPunchId=id; document.getElementById('pm-title').textContent='Edit Item';
-  document.getElementById('pm-title-in').value=p.title;
-  document.getElementById('pm-pri').value=p.priority||'med';
-  document.getElementById('pm-due').value=p.due||'';
-  document.getElementById('pm-assign').value=p.assigned||'';
-  document.getElementById('pm-notes').value=p.notes||'';
-  openModal('m-punch');
+  var job = cJob(); var p = (job.punch || []).find(function(x) { return x.id === id; });
+  if (!p) return;
+  editPId = id; document.getElementById('pm-t').textContent = 'Edit Item';
+  document.getElementById('pm-ti').value = p.title;
+  document.getElementById('pm-p').value = p.priority || 'med';
+  document.getElementById('pm-d').value = p.due || '';
+  document.getElementById('pm-a').value = p.assigned || '';
+  document.getElementById('pm-n').value = p.notes || '';
+  openM('m-punch');
 }
 function savePunch() {
-  var title=document.getElementById('pm-title-in').value.trim();
-  if(!title){toast('Description required','⚠️');return;}
-  var job=curJob();
-  var item={id:editPunchId||uid(),title:title,priority:document.getElementById('pm-pri').value,due:document.getElementById('pm-due').value,assigned:document.getElementById('pm-assign').value.trim(),notes:document.getElementById('pm-notes').value.trim(),done:false,created:todayStr()};
-  if(!job.punch) job.punch=[];
-  if(editPunchId){var ex=job.punch.find(function(x){return x.id===editPunchId;});if(ex){item.done=ex.done;item.doneAt=ex.doneAt;}job.punch=job.punch.map(function(x){return x.id===editPunchId?item:x;});}
-  else job.punch.push(item);
-  saveDB(); closeModal('m-punch'); renderPunch();
-  toast(editPunchId?'Item updated':'Item added','🔨');
+  var title = document.getElementById('pm-ti').value.trim();
+  if (!title) { toast('Description required'); return; }
+  var job = cJob();
+  var item = { id: editPId || uid(), title: title, priority: document.getElementById('pm-p').value, due: document.getElementById('pm-d').value, assigned: document.getElementById('pm-a').value.trim(), notes: document.getElementById('pm-n').value.trim(), done: false, created: today() };
+  if (!job.punch) job.punch = [];
+  if (editPId) {
+    var ex = job.punch.find(function(x) { return x.id === editPId; });
+    if (ex) { item.done = ex.done; item.doneAt = ex.doneAt; }
+    job.punch = job.punch.map(function(x) { return x.id === editPId ? item : x; });
+  } else { job.punch.push(item); }
+  saveDB(); closeM('m-punch'); renderPunch();
+  toast(editPId ? 'Item updated' : 'Item added');
 }
 
 function showEditJob() {
-  var job=curJob();
-  document.getElementById('ej-name').value=job.name;
-  document.getElementById('ej-client').value=job.client||'';
-  document.getElementById('ej-addr').value=job.location||'';
-  document.getElementById('ej-status').value=job.status;
-  document.getElementById('ej-num').value=job.number||'';
-  openModal('m-editjob');
+  var job = cJob();
+  document.getElementById('ej-n').value = job.name;
+  document.getElementById('ej-c').value = job.client || '';
+  document.getElementById('ej-a').value = job.location || '';
+  document.getElementById('ej-s').value = job.status;
+  document.getElementById('ej-num').value = job.number || '';
+  openM('m-ej');
 }
 function saveJobEdit() {
-  var job=curJob();
-  job.name=document.getElementById('ej-name').value.trim()||job.name;
-  job.client=document.getElementById('ej-client').value.trim();
-  job.location=document.getElementById('ej-addr').value.trim();
-  job.status=document.getElementById('ej-status').value;
-  job.number=document.getElementById('ej-num').value.trim();
-  document.getElementById('d-jobname').textContent=job.name;
-  document.getElementById('d-jobnum').textContent=job.number||(job.client||'');
-  saveDB(); closeModal('m-editjob'); toast('Job updated','✓');
+  var job = cJob();
+  job.name = document.getElementById('ej-n').value.trim() || job.name;
+  job.client = document.getElementById('ej-c').value.trim();
+  job.location = document.getElementById('ej-a').value.trim();
+  job.status = document.getElementById('ej-s').value;
+  job.number = document.getElementById('ej-num').value.trim();
+  document.getElementById('d-name').textContent = job.name;
+  document.getElementById('d-num').textContent = job.number || (job.client || '');
+  saveDB(); closeM('m-ej'); toast('Job updated');
 }
-function deleteCurrentJob() {
-  if(!confirm('Delete this job and all its data?')) return;
-  db.jobs=db.jobs.filter(function(j){return j.id!==curJobId;});
-  saveDB(); closeModal('m-editjob'); goTo('jobs'); toast('Job deleted','🗑️');
+function delJob() {
+  if (!confirm('Delete this job and all its data?')) return;
+  db.jobs = db.jobs.filter(function(j) { return j.id !== curJobId; });
+  saveDB(); closeM('m-ej'); goTo('jobs'); toast('Job deleted');
 }
 
 // LOG
 function renderLog() {
-  var job=curJob(); if(!job) return;
-  var reports=job.reports||[];
-  var totalPhotos=reports.reduce(function(n,r){return n+r.photos.length;},0);
-  var allTrades=[]; reports.forEach(function(r){(r.trades||[]).forEach(function(t){if(allTrades.indexOf(t)<0) allTrades.push(t);});});
-  document.getElementById('d-log-stats').innerHTML=
-    '<div class="stat-card"><div class="stat-val">'+reports.length+'</div><div class="stat-label">Reports</div></div>'+
-    '<div class="stat-card"><div class="stat-val">'+totalPhotos+'</div><div class="stat-label">Photos</div></div>'+
-    '<div class="stat-card"><div class="stat-val">'+allTrades.length+'</div><div class="stat-label">Trades</div></div>';
-  var list=document.getElementById('reportsList');
-  if(!reports.length){list.innerHTML='<div class="empty"><span class="empty-icon">📋</span><div class="empty-title">No reports yet</div>Tap + Today to start logging.</div>';return;}
-  list.innerHTML=reports.map(function(r){
-    var chips=[];
-    if(r.weather) chips.push(r.weather+(r.temp?' '+r.temp+'F':''));
-    if(r.workers) chips.push(r.workers+' 👷');
-    if(r.trades&&r.trades.length) chips.push(r.trades.length+' trades');
-    if(r.photos&&r.photos.length) chips.push('📸 '+r.photos.length);
-    var photosHTML=(r.photos||[]).map(function(p){return '<div class="photo-thumb"><img src="'+p.src+'" alt="" /></div>';}).join('');
-    var tradesHTML=(r.trades||[]).map(function(t){return '<span class="trade-chip-d">'+esc(t)+'</span>';}).join('');
-    return '<div class="report-card" id="rc-'+r.id+'">'+
-      '<div class="report-head" onclick="toggleReport(\''+r.id+'\')">'+
-      '<div><div class="report-date">'+fmtDate(r.date)+'</div>'+
-      '<div class="report-chips">'+chips.map(function(c){return '<span class="chip">'+c+'</span>';}).join('')+'</div></div>'+
-      '<div style="display:flex;gap:6px;align-items:center">'+
-      '<button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openEmailReport(\''+r.id+'\')">✉️</button>'+
-      '<button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openEditReport(\''+r.id+'\')">Edit</button>'+
-      '<button onclick="event.stopPropagation();deleteReport(\''+r.id+'\')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px">×</button>'+
-      '<span style="color:var(--muted);font-size:16px" id="ra-'+r.id+'">›</span></div></div>'+
-      '<div class="report-body" id="rb-'+r.id+'">'+
-      (r.workers||r.hours?'<div style="display:flex;gap:8px;margin-bottom:12px">'+(r.workers?'<span class="tag tag-o">👷 '+r.workers+' workers</span>':'')+(r.hours?'<span class="tag tag-b">⏱️ '+r.hours+' hrs</span>':'')+'</div>':'')+
-      (r.trades&&r.trades.length?'<div style="margin-bottom:12px"><div class="rslabel">Trades on Site</div><div class="trades-grid">'+tradesHTML+'</div></div>':'')+
-      (r.workDone?'<div style="margin-bottom:12px"><div class="rslabel">Work Performed</div><div class="rstext">'+esc(r.workDone)+'</div></div>':'')+
-      (r.issues?'<div style="margin-bottom:12px"><div class="rslabel">Issues / Delays</div><div class="rstext">'+esc(r.issues)+'</div></div>':'')+
-      (r.materials?'<div style="margin-bottom:12px"><div class="rslabel">Materials Delivered</div><div class="rstext">'+esc(r.materials)+'</div></div>':'')+
-      (r.nextDay?'<div style="margin-bottom:12px"><div class="rslabel">Next Day Plan</div><div class="rstext">'+esc(r.nextDay)+'</div></div>':'')+
-      (r.photos&&r.photos.length?'<div style="margin-bottom:8px"><div class="rslabel">Photos ('+r.photos.length+')</div><div class="photo-strip">'+photosHTML+'</div></div>':'')+
+  var job = cJob(); if (!job) return;
+  var reports = job.reports || [];
+  var tp = reports.reduce(function(n, r) { return n + r.photos.length; }, 0);
+  var at = [];
+  reports.forEach(function(r) { (r.trades || []).forEach(function(t) { if (at.indexOf(t) < 0) at.push(t); }); });
+  document.getElementById('d-log-stats').innerHTML =
+    '<div class="sk"><div class="sv">' + reports.length + '</div><div class="sl">Reports</div></div>' +
+    '<div class="sk"><div class="sv">' + tp + '</div><div class="sl">Photos</div></div>' +
+    '<div class="sk"><div class="sv">' + at.length + '</div><div class="sl">Trades</div></div>';
+  var list = document.getElementById('reports-list');
+  if (!reports.length) { list.innerHTML = '<div class="em"><span class="ei">📋</span><div class="et">No reports yet</div>Tap + Today to start logging.</div>'; return; }
+  list.innerHTML = reports.map(function(r) {
+    var chips = [];
+    if (r.weather) chips.push(r.weather + (r.temp ? ' ' + r.temp + 'F' : ''));
+    if (r.workers) chips.push(r.workers + ' workers');
+    if (r.trades && r.trades.length) chips.push(r.trades.length + ' trades');
+    if (r.photos && r.photos.length) chips.push(r.photos.length + ' photos');
+    var pHTML = (r.photos || []).map(function(p) { return '<div class="ph2"><img src="' + p.src + '" alt="" /></div>'; }).join('');
+    var tHTML = (r.trades || []).map(function(t) { return '<span class="tcd">' + esc(t) + '</span>'; }).join('');
+    return '<div class="rc" id="rc-' + r.id + '">' +
+      '<div class="rh" onclick="toggleR(\'' + r.id + '\')">' +
+      '<div><div class="rd2">' + fmtD(r.date) + '</div><div class="rcs">' + chips.map(function(c) { return '<span class="ch">' + c + '</span>'; }).join('') + '</div></div>' +
+      '<div style="display:flex;gap:6px;align-items:center">' +
+      '<button class="btn bg bx" onclick="event.stopPropagation();emailR(\'' + r.id + '\')">Email</button>' +
+      '<button class="btn bg bx" onclick="event.stopPropagation();editR(\'' + r.id + '\')">Edit</button>' +
+      '<button onclick="event.stopPropagation();delR(\'' + r.id + '\')" style="background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;padding:4px">x</button>' +
+      '<span style="color:var(--mu);font-size:16px" id="ra-' + r.id + '">›</span></div></div>' +
+      '<div class="rb2" id="rb-' + r.id + '">' +
+      (r.workers || r.hours ? '<div style="display:flex;gap:8px;margin-bottom:12px">' + (r.workers ? '<span class="tg to">' + r.workers + ' workers</span>' : '') + (r.hours ? '<span class="tg tb2">' + r.hours + ' hrs</span>' : '') + '</div>' : '') +
+      (r.trades && r.trades.length ? '<div style="margin-bottom:12px"><div class="rl">Trades on Site</div><div class="trd">' + tHTML + '</div></div>' : '') +
+      (r.workDone ? '<div style="margin-bottom:12px"><div class="rl">Work Performed</div><div class="rv">' + esc(r.workDone) + '</div></div>' : '') +
+      (r.issues ? '<div style="margin-bottom:12px"><div class="rl">Issues / Delays</div><div class="rv">' + esc(r.issues) + '</div></div>' : '') +
+      (r.materials ? '<div style="margin-bottom:12px"><div class="rl">Materials Delivered</div><div class="rv">' + esc(r.materials) + '</div></div>' : '') +
+      (r.nextDay ? '<div style="margin-bottom:12px"><div class="rl">Next Day Plan</div><div class="rv">' + esc(r.nextDay) + '</div></div>' : '') +
+      (r.photos && r.photos.length ? '<div style="margin-bottom:8px"><div class="rl">Photos (' + r.photos.length + ')</div><div class="ps">' + pHTML + '</div></div>' : '') +
       '</div></div>';
   }).join('');
 }
-function toggleReport(id) {
-  var b=document.getElementById('rb-'+id); var a=document.getElementById('ra-'+id);
-  var open=b.classList.toggle('open'); if(a) a.textContent=open?'▾':'›';
+function toggleR(id) {
+  var b = document.getElementById('rb-' + id); var a = document.getElementById('ra-' + id);
+  var open = b.classList.toggle('op'); if (a) a.textContent = open ? 'v' : '›';
 }
-function deleteReport(id) {
-  if(!confirm('Delete this report?')) return;
-  var job=curJob(); job.reports=job.reports.filter(function(r){return r.id!==id;}); saveDB(); renderLog();
+function delR(id) {
+  if (!confirm('Delete this report?')) return;
+  var job = cJob(); job.reports = job.reports.filter(function(r) { return r.id !== id; }); saveDB(); renderLog();
 }
-function addTodayReport() {
-  var job=curJob(); var td=todayStr();
-  if((job.reports||[]).find(function(r){return r.date===td;})){if(!confirm('A report for today exists. Add another?')) return;}
-  reportFromToday=false; openAddReport(td);
+function addToday() {
+  var job = cJob(); var td = today();
+  if ((job.reports || []).find(function(r) { return r.date === td; })) {
+    if (!confirm('A report for today exists. Add another?')) return;
+  }
+  fromToday = false; openReport(td);
 }
-function openAddReport(date) {
-  editReportId=null; rPhotos=[]; rTrades=[]; reportDate=date;
-  document.getElementById('rm-title').textContent='Log — '+fmtDate(date);
-  ['rm-weather','rm-temp','rm-work','rm-issues','rm-materials','rm-nextday'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('rm-workers').value=''; document.getElementById('rm-hours').value='';
-  buildTradesUI(); buildPhotosUI(); openModal('m-report');
+function openPickDate() {
+  document.getElementById('pd-date').value = today();
+  openM('m-date');
 }
-function openEditReport(id) {
-  var job=curJob(); var r=(job.reports||[]).find(function(x){return x.id===id;}); if(!r) return;
-  editReportId=id; rTrades=(r.trades||[]).slice(); rPhotos=(r.photos||[]).slice(); reportDate=r.date;
-  reportFromToday=false;
-  document.getElementById('rm-title').textContent='Edit — '+fmtDate(r.date);
-  document.getElementById('rm-weather').value=r.weather||'';
-  document.getElementById('rm-temp').value=r.temp||'';
-  document.getElementById('rm-workers').value=r.workers||'';
-  document.getElementById('rm-hours').value=r.hours||'';
-  document.getElementById('rm-work').value=r.workDone||'';
-  document.getElementById('rm-issues').value=r.issues||'';
-  document.getElementById('rm-materials').value=r.materials||'';
-  document.getElementById('rm-nextday').value=r.nextDay||'';
-  buildTradesUI(); buildPhotosUI(); openModal('m-report');
+function confirmDate() {
+  var date = document.getElementById('pd-date').value;
+  if (!date) { toast('Pick a date'); return; }
+  closeM('m-date'); fromToday = false; openReport(date);
+}
+function openReport(date) {
+  editRId = null; rPhotos = []; rTrades = []; rDate = date;
+  document.getElementById('rm-t').textContent = 'Log — ' + fmtD(date);
+  document.getElementById('rm-date').value = date;
+  ['rm-w','rm-temp','rm-work','rm-iss','rm-mat','rm-nxt'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('rm-wk').value = ''; document.getElementById('rm-hr').value = '';
+  buildTrades(); buildPhotos(); openM('m-report');
+}
+function editR(id) {
+  var job = cJob(); var r = (job.reports || []).find(function(x) { return x.id === id; }); if (!r) return;
+  editRId = id; rTrades = (r.trades || []).slice(); rPhotos = (r.photos || []).slice(); rDate = r.date;
+  fromToday = false;
+  document.getElementById('rm-t').textContent = 'Edit — ' + fmtD(r.date);
+  document.getElementById('rm-date').value = r.date;
+  document.getElementById('rm-w').value = r.weather || '';
+  document.getElementById('rm-temp').value = r.temp || '';
+  document.getElementById('rm-wk').value = r.workers || '';
+  document.getElementById('rm-hr').value = r.hours || '';
+  document.getElementById('rm-work').value = r.workDone || '';
+  document.getElementById('rm-iss').value = r.issues || '';
+  document.getElementById('rm-mat').value = r.materials || '';
+  document.getElementById('rm-nxt').value = r.nextDay || '';
+  buildTrades(); buildPhotos(); openM('m-report');
 }
 function saveReport() {
-  var job=curJob(); if(!job){toast('Error: no job','⚠️');return;}
-  var report={id:editReportId||uid(),date:reportDate,weather:document.getElementById('rm-weather').value,temp:document.getElementById('rm-temp').value,workers:document.getElementById('rm-workers').value,hours:document.getElementById('rm-hours').value,trades:rTrades.slice(),workDone:document.getElementById('rm-work').value.trim(),issues:document.getElementById('rm-issues').value.trim(),materials:document.getElementById('rm-materials').value.trim(),nextDay:document.getElementById('rm-nextday').value.trim(),photos:rPhotos.slice()};
-  if(!job.reports) job.reports=[];
-  if(editReportId) job.reports=job.reports.map(function(r){return r.id===editReportId?report:r;});
-  else job.reports.unshift(report);
-  saveDB(); closeModal('m-report');
-  if(reportFromToday){ reportFromToday=false; goTo('today'); }
-  else renderLog();
-  toast('Report saved','📋');
+  var job = cJob(); if (!job) { toast('Error: no job'); return; }
+  var selectedDate = document.getElementById('rm-date').value || rDate;
+  var report = { id: editRId || uid(), date: selectedDate, weather: document.getElementById('rm-w').value, temp: document.getElementById('rm-temp').value, workers: document.getElementById('rm-wk').value, hours: document.getElementById('rm-hr').value, trades: rTrades.slice(), workDone: document.getElementById('rm-work').value.trim(), issues: document.getElementById('rm-iss').value.trim(), materials: document.getElementById('rm-mat').value.trim(), nextDay: document.getElementById('rm-nxt').value.trim(), photos: rPhotos.slice() };
+  if (!job.reports) job.reports = [];
+  if (editRId) { job.reports = job.reports.map(function(r) { return r.id === editRId ? report : r; }); }
+  else { job.reports.unshift(report); }
+  saveDB(); closeM('m-report');
+  if (fromToday) { fromToday = false; goTo('today'); } else { renderLog(); }
+  toast('Report saved');
 }
 
-function buildTradesUI() {
-  document.getElementById('rm-trades').innerHTML=TRADES.map(function(t){
-    var on=rTrades.indexOf(t)>=0;
-    return '<button class="trade-chip'+(on?' on':'')+'" onclick="toggleTrade(this,\''+t+'\')">'+t+'</button>';
+function buildTrades() {
+  document.getElementById('rm-trades').innerHTML = TRADES.map(function(t) {
+    var on = rTrades.indexOf(t) >= 0;
+    return '<button class="tc' + (on ? ' on' : '') + '" onclick="togTrade(this,\'' + t + '\')">' + t + '</button>';
   }).join('');
 }
-function toggleTrade(btn,trade) {
-  var i=rTrades.indexOf(trade);
-  if(i>=0){rTrades.splice(i,1);btn.classList.remove('on');}
-  else{rTrades.push(trade);btn.classList.add('on');}
+function togTrade(btn, trade) {
+  var i = rTrades.indexOf(trade);
+  if (i >= 0) { rTrades.splice(i, 1); btn.classList.remove('on'); } else { rTrades.push(trade); btn.classList.add('on'); }
 }
-function buildPhotosUI() {
-  var strip=document.getElementById('rm-photos');
-  var thumbs=rPhotos.map(function(p){return '<div class="photo-thumb"><img src="'+p.src+'" alt="" /><button class="photo-remove" onclick="removePhoto(\''+p.id+'\')">×</button></div>';}).join('');
-  strip.innerHTML=thumbs+'<label class="photo-add-lbl" for="photoInput">+</label>';
+function buildPhotos() {
+  var strip = document.getElementById('rm-photos');
+  var thumbs = rPhotos.map(function(p) { return '<div class="ph2"><img src="' + p.src + '" alt="" /><button class="pr" onclick="delPhoto(\'' + p.id + '\')">x</button></div>'; }).join('');
+  strip.innerHTML = thumbs + '<label class="pa" for="photo-in">+</label>';
 }
-function removePhoto(id){rPhotos=rPhotos.filter(function(p){return p.id!==id;});buildPhotosUI();}
-function handlePhotoAdd(input) {
-  var files=Array.from(input.files||[]); if(!files.length) return;
-  var loaded=0;
-  files.forEach(function(file){
-    var reader=new FileReader();
-    reader.onload=function(ev){rPhotos.push({id:uid(),src:ev.target.result,caption:file.name});loaded++;if(loaded===files.length)buildPhotosUI();};
-    reader.onerror=function(){loaded++;if(loaded===files.length)buildPhotosUI();};
+function delPhoto(id) { rPhotos = rPhotos.filter(function(p) { return p.id !== id; }); buildPhotos(); }
+function addPhoto(input) {
+  var files = Array.from(input.files || []); if (!files.length) return;
+  var loaded = 0;
+  files.forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(ev) { rPhotos.push({ id: uid(), src: ev.target.result, caption: file.name }); loaded++; if (loaded === files.length) buildPhotos(); };
+    reader.onerror = function() { loaded++; if (loaded === files.length) buildPhotos(); };
     reader.readAsDataURL(file);
   });
-  setTimeout(function(){input.value='';},500);
+  setTimeout(function() { input.value = ''; }, 500);
 }
 
-function openEmailReport(reportId) {
-  var job=curJob(); var r=(job.reports||[]).find(function(x){return x.id===reportId;}); if(!r) return;
-  var subject='Site Report - '+job.name+' - '+fmtDate(r.date);
-  var tradesStr=r.trades&&r.trades.length?r.trades.join(', '):'None recorded';
-  var lines=['DAILY SITE REPORT','===================================','Job:       '+job.name,'Job #:     '+(job.number||'-'),'Location:  '+(job.location||'-'),'Client:    '+(job.client||'-'),'Date:      '+fmtDateLong(r.date),'Weather:   '+(r.weather||'-')+(r.temp?' / '+r.temp+'F':''),'Workers:   '+(r.workers||'-'),'Hours:     '+(r.hours||'-'),'','TRADES ON SITE','-----------------------------------',tradesStr,'','WORK PERFORMED','-----------------------------------',(r.workDone||'(none recorded)'),'','ISSUES / DELAYS','-----------------------------------',(r.issues||'(none)'),'','MATERIALS DELIVERED','-----------------------------------',(r.materials||'(none)'),'','NEXT DAY PLAN','-----------------------------------',(r.nextDay||'(none recorded)'),'',(r.photos&&r.photos.length?'Photos: '+r.photos.length+' on file':''),'','-----------------------------------','Generated by Site Boss'];
-  var body=lines.join('\n');
-  document.getElementById('em-subj').textContent=subject;
-  document.getElementById('em-body').textContent=body;
-  document.getElementById('em-link').href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
-  openModal('m-email');
+function emailR(reportId) {
+  var job = cJob(); var r = (job.reports || []).find(function(x) { return x.id === reportId; }); if (!r) return;
+  var subj = 'Site Report - ' + job.name + ' - ' + fmtD(r.date);
+  var ts = r.trades && r.trades.length ? r.trades.join(', ') : 'None recorded';
+  var lines = ['DAILY SITE REPORT','===================================','Job:       ' + job.name,'Job #:     ' + (job.number || '-'),'Location:  ' + (job.location || '-'),'Client:    ' + (job.client || '-'),'Date:      ' + fmtDL(r.date),'Weather:   ' + (r.weather || '-') + (r.temp ? ' / ' + r.temp + 'F' : ''),'Workers:   ' + (r.workers || '-'),'Hours:     ' + (r.hours || '-'),'','TRADES ON SITE','-----------------------------------',ts,'','WORK PERFORMED','-----------------------------------',(r.workDone || '(none recorded)'),'','ISSUES / DELAYS','-----------------------------------',(r.issues || '(none)'),'','MATERIALS DELIVERED','-----------------------------------',(r.materials || '(none)'),'','NEXT DAY PLAN','-----------------------------------',(r.nextDay || '(none recorded)'),'',(r.photos && r.photos.length ? 'Photos: ' + r.photos.length + ' on file' : ''),'','-----------------------------------','Generated by Site Boss'];
+  var body = lines.join('\n');
+  document.getElementById('em-s').textContent = subj;
+  document.getElementById('em-b').textContent = body;
+  document.getElementById('em-l').href = 'mailto:?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
+  openM('m-email');
 }
 
 // CHECKLIST
-function fillChecklistSelect() {
-  var sel=document.getElementById('cl-job');
-  var cur=sel.value;
-  sel.innerHTML='<option value="">-- Select a job --</option>';
-  db.jobs.forEach(function(job){
-    var opt=document.createElement('option');
-    opt.value=job.id; opt.textContent=job.name;
-    if(job.id===cur) opt.selected=true;
+function fillCLSelect() {
+  var sel = document.getElementById('cl-job');
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">-- Select a job --</option>';
+  db.jobs.forEach(function(job) {
+    var opt = document.createElement('option');
+    opt.value = job.id; opt.textContent = job.name;
+    if (job.id === cur) opt.selected = true;
     sel.appendChild(opt);
   });
 }
-function loadChecklist() {
-  var jobId=document.getElementById('cl-job').value;
-  if(!jobId){document.getElementById('cl-progress').style.display='none';document.getElementById('cl-content').innerHTML='';return;}
-  var job=db.jobs.find(function(j){return j.id===jobId;});
-  if(!job) return;
-  if(!job.checklist){
-    job.checklist=CHECKLIST.map(function(ph){return{phase:ph.phase,icon:ph.icon,items:ph.items.map(function(it){return{text:it,done:false};})};});
+function loadCL() {
+  var jobId = document.getElementById('cl-job').value;
+  if (!jobId) { document.getElementById('cl-progress').style.display = 'none'; document.getElementById('cl-content').innerHTML = ''; return; }
+  var job = db.jobs.find(function(j) { return j.id === jobId; }); if (!job) return;
+  if (!job.checklist) {
+    job.checklist = CL.map(function(ph) { return { ph: ph.ph, n: ph.n, items: ph.items.map(function(it) { return { text: it, done: false }; }) }; });
     saveDB();
   }
-  renderChecklist(job);
+  renderCL(job);
 }
-function renderChecklist(job) {
-  var cl=job.checklist||[];
-  var total=cl.reduce(function(n,p){return n+p.items.length;},0);
-  var done=cl.reduce(function(n,p){return n+p.items.filter(function(i){return i.done;}).length;},0);
-  var pct=total>0?Math.round((done/total)*100):0;
-  document.getElementById('cl-progress').style.display='block';
-  document.getElementById('cl-pct').textContent=pct+'%';
-  document.getElementById('cl-frac').textContent=done+'/'+total;
-  document.getElementById('cl-bar').style.width=pct+'%';
-  document.getElementById('cl-bar').style.background=pct===100?'linear-gradient(90deg,var(--green),#3DFF9A)':'linear-gradient(90deg,var(--orange),var(--orange2))';
-  var jobId=job.id;
-  var html=cl.map(function(phase,pi){
-    var pDone=phase.items.filter(function(i){return i.done;}).length;
-    var pTotal=phase.items.length;
-    var pPct=Math.round((pDone/pTotal)*100);
-    var allDone=pDone===pTotal;
-    return '<div style="margin-bottom:14px">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer" onclick="togglePhase('+pi+')">'+
-      '<div style="display:flex;align-items:center;gap:8px">'+
-      '<span style="font-size:18px">'+phase.icon+'</span>'+
-      '<div><div style="font-size:13px;font-weight:700;color:'+(allDone?'var(--green)':'var(--text)')+'">'+esc(phase.phase)+'</div>'+
-      '<div style="font-family:var(--mono);font-size:10px;color:'+(allDone?'var(--green)':'var(--muted)')+'">'+( allDone?'✅ Complete':pDone+'/'+pTotal+' done · '+pPct+'%')+'</div></div></div>'+
-      '<span style="color:var(--muted);font-size:16px" id="pa-'+pi+'">›</span></div>'+
-      '<div style="height:3px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden">'+
-      '<div style="height:100%;width:'+pPct+'%;background:'+(allDone?'var(--green)':'var(--orange)')+';border-radius:2px;transition:width 0.3s"></div></div>'+
-      '<div id="pi-'+pi+'" style="display:none">'+
-      phase.items.map(function(item,ii){
-        return '<div class="cl-item" style="opacity:'+(item.done?'0.5':'1')+'">'+
-          '<button class="cl-check'+(item.done?' on':'')+'" onclick="toggleCLItem(\''+jobId+'\','+pi+','+ii+')">'+( item.done?'✓':'')+'</button>'+
-          '<div style="font-size:13px;line-height:1.5;'+(item.done?'text-decoration:line-through;color:var(--muted)':'color:var(--text)')+'">'+esc(item.text)+'</div>'+
+function renderCL(job) {
+  var cl = job.checklist || [];
+  var total = cl.reduce(function(n, p) { return n + p.items.length; }, 0);
+  var done = cl.reduce(function(n, p) { return n + p.items.filter(function(i) { return i.done; }).length; }, 0);
+  var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('cl-progress').style.display = 'block';
+  document.getElementById('cl-pct').textContent = pct + '%';
+  document.getElementById('cl-frac').textContent = done + '/' + total;
+  document.getElementById('cl-bar').style.width = pct + '%';
+  document.getElementById('cl-bar').style.background = pct === 100 ? 'linear-gradient(90deg,var(--gr),#3DFF9A)' : 'linear-gradient(90deg,var(--or),var(--or2))';
+  var jid = job.id;
+  var h = cl.map(function(phase, pi) {
+    var pd = phase.items.filter(function(i) { return i.done; }).length;
+    var pt = phase.items.length;
+    var pp = Math.round((pd / pt) * 100);
+    var ad = pd === pt;
+    return '<div style="margin-bottom:14px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer" onclick="togPhase(' + pi + ')">' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+      '<span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:var(--or);color:#000;border-radius:50%;font-family:var(--mono);font-size:10px;font-weight:700;flex-shrink:0">' + phase.n + '</span>' +
+      '<div><div style="font-size:13px;font-weight:700;color:' + (ad ? 'var(--gr)' : 'var(--tx)') + '">' + esc(phase.ph) + '</div>' +
+      '<div style="font-family:var(--mono);font-size:10px;color:' + (ad ? 'var(--gr)' : 'var(--mu)') + '">' + (ad ? 'Complete' : pd + '/' + pt + ' done - ' + pp + '%') + '</div></div></div>' +
+      '<span style="color:var(--mu);font-size:16px" id="pa-' + pi + '">›</span></div>' +
+      '<div style="height:3px;background:var(--bd);border-radius:2px;margin-bottom:10px;overflow:hidden">' +
+      '<div style="height:100%;width:' + pp + '%;background:' + (ad ? 'var(--gr)' : 'var(--or)') + ';border-radius:2px;transition:width .3s"></div></div>' +
+      '<div id="pi-' + pi + '" style="display:none">' +
+      phase.items.map(function(item, ii) {
+        return '<div class="ci" style="opacity:' + (item.done ? '.5' : '1') + '">' +
+          '<button class="cc' + (item.done ? ' on' : '') + '" onclick="togCI(\'' + jid + '\',' + pi + ',' + ii + ')">' + (item.done ? 'v' : '') + '</button>' +
+          '<div style="font-size:13px;line-height:1.5;' + (item.done ? 'text-decoration:line-through;color:var(--mu)' : 'color:var(--tx)') + '">' + esc(item.text) + '</div>' +
           '</div>';
-      }).join('')+
+      }).join('') +
       '</div></div>';
   }).join('');
-  document.getElementById('cl-content').innerHTML=html;
+  document.getElementById('cl-content').innerHTML = h;
 }
-function togglePhase(pi) {
-  var p=document.getElementById('pi-'+pi); var a=document.getElementById('pa-'+pi);
-  var open=p.style.display==='none'; p.style.display=open?'block':'none'; if(a) a.textContent=open?'▾':'›';
+function togPhase(pi) {
+  var p = document.getElementById('pi-' + pi); var a = document.getElementById('pa-' + pi);
+  var open = p.style.display === 'none'; p.style.display = open ? 'block' : 'none'; if (a) a.textContent = open ? 'v' : '›';
 }
-function toggleCLItem(jobId,pi,ii) {
-  var job=db.jobs.find(function(j){return j.id===jobId;});
-  if(!job||!job.checklist) return;
-  job.checklist[pi].items[ii].done=!job.checklist[pi].items[ii].done;
-  saveDB(); renderChecklist(job);
-  var panel=document.getElementById('pi-'+pi); var arrow=document.getElementById('pa-'+pi);
-  if(panel){panel.style.display='block';if(arrow) arrow.textContent='▾';}
+function togCI(jid, pi, ii) {
+  var job = db.jobs.find(function(j) { return j.id === jid; }); if (!job || !job.checklist) return;
+  job.checklist[pi].items[ii].done = !job.checklist[pi].items[ii].done;
+  saveDB(); renderCL(job);
+  var panel = document.getElementById('pi-' + pi); var arrow = document.getElementById('pa-' + pi);
+  if (panel) { panel.style.display = 'block'; if (arrow) arrow.textContent = 'v'; }
 }
-function resetChecklist() {
-  var jobId=document.getElementById('cl-job').value;
-  if(!jobId){toast('Select a job first','⚠️');return;}
-  if(!confirm('Reset entire checklist for this job?')) return;
-  var job=db.jobs.find(function(j){return j.id===jobId;});
-  if(!job) return;
-  job.checklist=null; saveDB(); loadChecklist(); toast('Checklist reset','🔄');
+function resetCL() {
+  var jid = document.getElementById('cl-job').value;
+  if (!jid) { toast('Select a job first'); return; }
+  if (!confirm('Reset entire checklist for this job?')) return;
+  var job = db.jobs.find(function(j) { return j.id === jid; }); if (!job) return;
+  job.checklist = null; saveDB(); loadCL(); toast('Checklist reset');
 }
 
 // NOTES
 function renderNotes() {
-  var list=document.getElementById('notesList');
-  if(!db.notes.length){list.innerHTML='<div class="empty"><span class="empty-icon">📝</span><div class="empty-title">No notes yet</div>Tap + Note to add one.</div>';return;}
-  list.innerHTML=db.notes.map(function(n){
-    return '<div class="note-card"><div class="note-text">'+esc(n.text)+'</div>'+
-      '<div class="note-meta">'+(n.tag?'<span class="tag tag-o">'+esc(n.tag)+'</span>':'')+'<span>'+fmtDate(n.created)+'</span>'+
-      '<button onclick="deleteNote(\''+n.id+'\')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;margin-left:auto;padding:2px">×</button></div></div>';
+  var list = document.getElementById('notes-list');
+  if (!db.notes.length) { list.innerHTML = '<div class="em"><span class="ei">📝</span><div class="et">No notes yet</div>Tap + Note to add one.</div>'; return; }
+  list.innerHTML = db.notes.map(function(n) {
+    return '<div class="nc"><div class="nt">' + esc(n.text) + '</div>' +
+      '<div class="nm">' + (n.tag ? '<span class="tg to">' + esc(n.tag) + '</span>' : '') + '<span>' + fmtD(n.created) + '</span>' +
+      '<button onclick="delNote(\'' + n.id + '\')" style="background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;margin-left:auto;padding:2px">x</button></div></div>';
   }).join('');
 }
-function showAddNote(){document.getElementById('addNoteForm').style.display='block';document.getElementById('nn-text').focus();}
-function hideAddNote(){document.getElementById('addNoteForm').style.display='none';document.getElementById('nn-text').value='';document.getElementById('nn-tag').value='';}
-function createNote(){
-  var text=document.getElementById('nn-text').value.trim();
-  if(!text){toast('Note cannot be empty','⚠️');return;}
-  db.notes.unshift({id:uid(),text:text,tag:document.getElementById('nn-tag').value.trim(),created:todayStr()});
-  saveDB();hideAddNote();renderNotes();toast('Note saved','📝');
+function showAddNote() { document.getElementById('add-note-form').style.display = 'block'; document.getElementById('nn-t').focus(); }
+function hideAddNote() { document.getElementById('add-note-form').style.display = 'none'; document.getElementById('nn-t').value = ''; document.getElementById('nn-tag').value = ''; }
+function createNote() {
+  var text = document.getElementById('nn-t').value.trim();
+  if (!text) { toast('Note cannot be empty'); return; }
+  db.notes.unshift({ id: uid(), text: text, tag: document.getElementById('nn-tag').value.trim(), created: today() });
+  saveDB(); hideAddNote(); renderNotes(); toast('Note saved');
 }
-function deleteNote(id){db.notes=db.notes.filter(function(n){return n.id!==id;});saveDB();renderNotes();}
+function delNote(id) { db.notes = db.notes.filter(function(n) { return n.id !== id; }); saveDB(); renderNotes(); }
 
 // BACKUP
-function makeBackup(data){return JSON.stringify({version:4,exported:new Date().toISOString(),jobs:data.jobs,notes:data.notes});}
-function makeMailtoBody(str){return encodeURIComponent('SITE BOSS BACKUP\n\nTo restore: open Site Boss, tap Backup, choose Load Backup, paste all text below.\n\n---BEGIN BACKUP---\n'+str+'\n---END BACKUP---');}
-function showBackupModal(){
-  var subj=encodeURIComponent('Site Boss Backup - '+new Date().toLocaleDateString());
-  var full=makeBackup(db);
-  var noPhotos=makeBackup({jobs:db.jobs.map(function(j){return Object.assign({},j,{reports:(j.reports||[]).map(function(r){return Object.assign({},r,{photos:[]});})});}),notes:db.notes});
-  var totalPhotos=db.jobs.reduce(function(n,j){return n+(j.reports||[]).reduce(function(m,r){return m+r.photos.length;},0);},0);
-  document.getElementById('b-email-full').href='mailto:?subject='+subj+'&body='+makeMailtoBody(full);
-  var npl=document.getElementById('b-email-nophoto');
-  if(totalPhotos>0){npl.href='mailto:?subject='+subj+'&body='+makeMailtoBody(noPhotos);npl.textContent='Email Without Photos ('+totalPhotos+' excluded)';npl.style.display='block';}
-  else npl.style.display='none';
-  document.getElementById('b-paste').value='';
-  document.getElementById('b-error').style.display='none';
-  switchBTab('save'); openModal('m-backup');
+function mkBackup(data) { return JSON.stringify({ version: 5, exported: new Date().toISOString(), jobs: data.jobs, notes: data.notes }); }
+function mkMail(str) { return encodeURIComponent('SITE BOSS BACKUP\n\nTo restore: open Site Boss, tap Backup, choose Load Backup, paste all text below.\n\n---BEGIN BACKUP---\n' + str + '\n---END BACKUP---'); }
+function showBackup() {
+  var subj = encodeURIComponent('Site Boss Backup - ' + new Date().toLocaleDateString());
+  var full = mkBackup(db);
+  var noP = mkBackup({ jobs: db.jobs.map(function(j) { return Object.assign({}, j, { reports: (j.reports || []).map(function(r) { return Object.assign({}, r, { photos: [] }); }) }); }), notes: db.notes });
+  var tp = db.jobs.reduce(function(n, j) { return n + (j.reports || []).reduce(function(m, r) { return m + r.photos.length; }, 0); }, 0);
+  document.getElementById('b-full').href = 'mailto:?subject=' + subj + '&body=' + mkMail(full);
+  var npl = document.getElementById('b-nophoto');
+  if (tp > 0) { npl.href = 'mailto:?subject=' + subj + '&body=' + mkMail(noP); npl.textContent = 'Email Without Photos (' + tp + ' excluded)'; npl.style.display = 'block'; }
+  else { npl.style.display = 'none'; }
+  document.getElementById('b-paste').value = '';
+  document.getElementById('b-err').style.display = 'none';
+  switchBT('save'); openM('m-backup');
 }
-function switchBTab(tab){
-  document.getElementById('bt-save').classList.toggle('active',tab==='save');
-  document.getElementById('bt-load').classList.toggle('active',tab==='load');
-  document.getElementById('b-save').style.display=tab==='save'?'block':'none';
-  document.getElementById('b-load').style.display=tab==='load'?'block':'none';
+function switchBT(tab) {
+  document.getElementById('bt-s').classList.toggle('on', tab === 'save');
+  document.getElementById('bt-l').classList.toggle('on', tab === 'load');
+  document.getElementById('b-save').style.display = tab === 'save' ? 'block' : 'none';
+  document.getElementById('b-load').style.display = tab === 'load' ? 'block' : 'none';
 }
-function doRestore(){
-  var errEl=document.getElementById('b-error'); errEl.style.display='none';
-  var raw=document.getElementById('b-paste').value.trim();
-  if(raw.indexOf('---BEGIN BACKUP---')>=0) raw=raw.split('---BEGIN BACKUP---')[1];
-  if(raw.indexOf('---END BACKUP---')>=0) raw=raw.split('---END BACKUP---')[0];
-  raw=raw.trim();
-  try{
-    var p=JSON.parse(raw);
-    if(!confirm('Restore backup? This replaces all current data.')) return;
-    db.jobs=p.jobs||[]; db.notes=p.notes||[];
-    saveDB(); closeModal('m-backup'); goTo('today'); toast('Restored','✅');
-  }catch(e){errEl.textContent='Could not read backup. Paste the full text from your email.';errEl.style.display='block';}
+function doRestore() {
+  var errEl = document.getElementById('b-err'); errEl.style.display = 'none';
+  var raw = document.getElementById('b-paste').value.trim();
+  if (raw.indexOf('---BEGIN BACKUP---') >= 0) raw = raw.split('---BEGIN BACKUP---')[1];
+  if (raw.indexOf('---END BACKUP---') >= 0) raw = raw.split('---END BACKUP---')[0];
+  raw = raw.trim();
+  try {
+    var p = JSON.parse(raw);
+    if (!confirm('Restore backup? This replaces all current data.')) return;
+    db.jobs = p.jobs || []; db.notes = p.notes || [];
+    saveDB(); closeM('m-backup'); goTo('today'); toast('Restored');
+  } catch(e) { errEl.textContent = 'Could not read backup. Paste the full text from your email.'; errEl.style.display = 'block'; }
 }
 
-// INIT
 loadDB();
 renderToday();
 </script>
