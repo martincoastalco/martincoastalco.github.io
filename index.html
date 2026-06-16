@@ -666,22 +666,30 @@ function buildPhotosUI() {
       <img src="${p.src}" alt="" />
       <button class="photo-remove" onclick="removePhoto('${p.id}')">x</button>
     </div>`).join('');
-  strip.innerHTML = thumbs + `<button class="photo-add" onclick="document.getElementById('photoInput').click()">+</button>`;
+  strip.innerHTML = thumbs + `<label class="photo-add" for="photoInput" style="cursor:pointer">+</label>`;
 }
 function removePhoto(id) {
   reportPhotos = reportPhotos.filter(p=>p.id!==id);
   buildPhotosUI();
 }
 function handlePhotoAdd(input) {
-  Array.from(input.files).forEach(file => {
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+  let loaded = 0;
+  files.forEach(file => {
     const reader = new FileReader();
     reader.onload = ev => {
       reportPhotos.push({ id:uid(), src:ev.target.result, caption:file.name });
-      buildPhotosUI();
+      loaded++;
+      if (loaded === files.length) buildPhotosUI();
+    };
+    reader.onerror = () => {
+      loaded++;
+      if (loaded === files.length) buildPhotosUI();
     };
     reader.readAsDataURL(file);
   });
-  input.value = '';
+  setTimeout(() => { input.value = ''; }, 500);
 }
 
 function openAddReport(date) {
